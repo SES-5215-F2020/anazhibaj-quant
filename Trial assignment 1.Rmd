@@ -1,0 +1,19 @@
+---
+title: "Trial assignment 1"
+author: "Ana Zhibaj"
+date: "9/5/2020"
+output: html_document
+---
+# Level 1 Title
+
+Text text text!
+
+## Level 2 Header
+
+More text
+
+```{r}
+2 + 2
+```
+
+That was the answer! 
