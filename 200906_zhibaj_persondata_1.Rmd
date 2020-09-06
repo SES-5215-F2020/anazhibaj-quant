@@ -1,0 +1,33 @@
+---
+title: "200906_2"
+author: "Ana Zhibaj"
+date: "9/6/2020"
+output: html_document
+---
+```{r}
+library(tidycensus)
+library(tidyverse)
+```
+
+```{r load person-level data, results = 'hide'}
+zhibaj_persondata <- get_pums(variables = c("AGEP", 
+                                      "CIT", 
+                                      "CITWP",
+                                      "COW",
+                                      "WAGP",
+                                      "WKHP",
+                                      "POVPIP"),
+                        state = "NY", 
+                        year = 2018, 
+                        survey = "acs1",
+                        recode = TRUE) %>%
+  filter(CIT == 4) %>%
+  select(AGEP, CIT_label, CITWP, COW_label, WAGP, WKHP, POVPIP)
+
+
+```
+
+```{r}
+zhibaj_persondata
+```
+
