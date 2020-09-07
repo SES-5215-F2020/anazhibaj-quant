@@ -10,14 +10,24 @@ library(tidyverse)
 ```
 
 ## Dataset variables
-I am interested in person-level data, that is why I'll use variables from the 2018 ASC1 dataset for the state of California. The variables are as follows:
+I am interested in class and citizenship on an individual level, that is why I'll use variables from the 2018 ASC1 dataset for the state of California. My sample population is citizens that have attained their citizenship by naturalization. I want to inspect how that status (and its period) compares, or corellates, to race and class. 
 
-                **Name**                 |    **Code**    | **Type**
----------------------------------------- | -------------- | --------
-Age                                      | Content Cell   |   Type
-Citizenship status                       | Content Cell   |   Type
-Race: American Indian and Alaska Native  | Content Cell   |   Type
-Wages/Salary income past 12 months       | Content cell   |   Type
+The variables are as follows:
+
+                  Name                   |      Code      |   Type 
+-----------------------------------------|----------------|---------
+Age                                      | AGEP           |   cont
+Citizenship status                       | CIT            |   catg
+Race: American Indian and Alaska Native  | RACAIAN        |   catg
+Race: Asian                              | RACASN         |   catg
+Race: Black                              | RACBLK         |   catg
+Other Race                               | RACSOR         |   catg
+Race: White                              | RACWHT         |   catg
+Employment status recode                 | ESR            |   catg
+Educational attainment                   | SCHL           |   catg
+Wages/Salary income past 12 months       | WAGP           |   cont
+Year of entry                            | YOEP           |   cont
+Year of naturalization                   | CITWP          |   cont
 
 1. Age: AGEP
 2. Citizenship status: CIT
@@ -31,7 +41,9 @@ Wages/Salary income past 12 months       | Content cell   |   Type
 5. Educational attainment: SCHL
 6. Wages/salary income past 12 months: WAGP
 7. Year of Entry: YOEP
-8. 
+8. Year of Naturalization: CITWP
+
+## Uploading the person-level microdata variables from the 2018 ACS1 census
 
 ```{r load person-level microdata variables}
 person_vars_2018 <- pums_variables %>%
@@ -39,6 +51,9 @@ person_vars_2018 <- pums_variables %>%
            var_label, data_type, level) %>%
   filter(level == "person", year == 2018, survey == "acs1")
 ```
+
+## Variable-picking: like apple-picking, only more fun! 
+This is where I picked the variables that I had previously defined. I picked multiple indicators for race, because I wanted to have a more nuanced understanding of race, as it compares to citizenship, other than the bland white/ non-white binary. 
 
 ```{r, results = 'hide'}
 person_population <- get_pums(variables = c("AGEP", 
@@ -59,25 +74,28 @@ person_population <- get_pums(variables = c("AGEP",
                         recode = TRUE) %>%
   select(AGEP, CIT_label, RACAIAN, RACASN, RACBLK, RACSOR, RACWHT, ESR_label, SCHL_label, WAGP, YOEP, CITWP)
 ```
+I defined the total population by calculating the number of observations from the census. 
 
 ```{r Creating the population for the dataset}
 total_pop <- nrow(person_population)
 ```
 
+## Isolating a variable
+I filtered the value 4 for Citizenship status, "US Citizen by naturalization", to generate my sample population.
 
 ```{r load person-level data, results = 'hide'}
-zhibaj_persondata <- get_pums(variables = c("AGEP", 
-                                      "CIT", 
-                                      "RACAIAN",
-                                      "RACASN",
-                                      "RACBLK",
-                                      "RACSOR", 
-                                      "RACWHT",
-                                      "ESR",
-                                      "SCHL",
-                                      "WAGP",
-                                      "YOEP",
-                                      "CITWP"),
+zhibaj_persondata <- get_pums(variables = c( AGEP= "AGEP", 
+                                      CIT = "CIT", 
+                                      RACAIAN = "RACAIAN",
+                                      RACASN = "RACASN",
+                                      RACBLK = "RACBLK",
+                                      RACSOR = "RACSOR", 
+                                      RACWHT = "RACWHT",
+                                      ESR = "ESR",
+                                      SCHL = "SCHL",
+                                      WAGP = "WAGP",
+                                      YOEP = "YOEP",
+                                      CITWP = "CITWP"),
                         state = "CA", 
                         year = 2018, 
                         survey = "acs1",
@@ -85,8 +103,10 @@ zhibaj_persondata <- get_pums(variables = c("AGEP",
   filter(CIT == 4) %>%
   select(AGEP, CIT_label, RACAIAN, RACASN, RACBLK, RACSOR, RACWHT, ESR_label, SCHL_label, WAGP, YOEP, CITWP)
 ```
+## Sneak peek of the code 
 
 ```{r}
 zhibaj_persondata
 ```
+
 

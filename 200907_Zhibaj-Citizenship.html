@@ -381,9 +381,10 @@ library(tidyverse)</code></pre>
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <div id="dataset-variables" class="section level2">
 <h2>Dataset variables</h2>
-<p>I am interested in person-level data, that is why I’ll use variables from the 2018 ASC1 dataset for the state of California. The variables are as follows:</p>
-<pre><code>            **Name**                 |    **Code**    | **Type**</code></pre>
-<p>—————————————- | ————– | ——– Age | Content Cell | Type Citizenship status | Content Cell | Type Race: American Indian and Alaska Native | Content Cell | Type Wages/Salary income past 12 months | Content cell | Type</p>
+<p>I am interested in class and citizenship on an individual level, that is why I’ll use variables from the 2018 ASC1 dataset for the state of California. My sample population is citizens that have attained their citizenship by naturalization. I want to inspect how that status (and its period) compares, or corellates, to race and class.</p>
+<p>The variables are as follows:</p>
+<pre><code>              Name                   |      Code      |   Type </code></pre>
+<p>—————————————–|—————-|——— Age | AGEP | cont Citizenship status | CIT | catg Race: American Indian and Alaska Native | RACAIAN | catg Race: Asian | RACASN | catg Race: Black | RACBLK | catg Other Race | RACSOR | catg Race: White | RACWHT | catg Employment status recode | ESR | catg Educational attainment | SCHL | catg Wages/Salary income past 12 months | WAGP | cont Year of entry | YOEP | cont Year of naturalization | CITWP | cont</p>
 <ol style="list-style-type: decimal">
 <li>Age: AGEP</li>
 <li>Citizenship status: CIT</li>
@@ -401,12 +402,19 @@ library(tidyverse)</code></pre>
 <li>Educational attainment: SCHL</li>
 <li>Wages/salary income past 12 months: WAGP</li>
 <li>Year of Entry: YOEP</li>
-<li></li>
+<li>Year of Naturalization: CITWP</li>
 </ol>
+</div>
+<div id="uploading-the-person-level-microdata-variables-from-the-2018-acs1-census" class="section level2">
+<h2>Uploading the person-level microdata variables from the 2018 ACS1 census</h2>
 <pre class="r"><code>person_vars_2018 &lt;- pums_variables %&gt;%
   distinct(year, survey, var_code,
            var_label, data_type, level) %&gt;%
   filter(level == &quot;person&quot;, year == 2018, survey == &quot;acs1&quot;)</code></pre>
+</div>
+<div id="variable-picking-like-apple-picking-only-more-fun" class="section level2">
+<h2>Variable-picking: like apple-picking, only more fun!</h2>
+<p>This is where I picked the variables that I had previously defined. I picked multiple indicators for race, because I wanted to have a more nuanced understanding of race, as it compares to citizenship, other than the bland white/ non-white binary.</p>
 <pre class="r"><code>person_population &lt;- get_pums(variables = c(&quot;AGEP&quot;, 
                                       &quot;CIT&quot;, 
                                       &quot;RACAIAN&quot;,
@@ -425,19 +433,24 @@ library(tidyverse)</code></pre>
                         recode = TRUE) %&gt;%
   select(AGEP, CIT_label, RACAIAN, RACASN, RACBLK, RACSOR, RACWHT, ESR_label, SCHL_label, WAGP, YOEP, CITWP)</code></pre>
 <pre><code>## Getting data from the 2018 1-year ACS Public Use Microdata Sample</code></pre>
+<p>I defined the total population by calculating the number of observations from the census.</p>
 <pre class="r"><code>total_pop &lt;- nrow(person_population)</code></pre>
-<pre class="r"><code>zhibaj_persondata &lt;- get_pums(variables = c(&quot;AGEP&quot;, 
-                                      &quot;CIT&quot;, 
-                                      &quot;RACAIAN&quot;,
-                                      &quot;RACASN&quot;,
-                                      &quot;RACBLK&quot;,
-                                      &quot;RACSOR&quot;, 
-                                      &quot;RACWHT&quot;,
-                                      &quot;ESR&quot;,
-                                      &quot;SCHL&quot;,
-                                      &quot;WAGP&quot;,
-                                      &quot;YOEP&quot;,
-                                      &quot;CITWP&quot;),
+</div>
+<div id="isolating-a-variable" class="section level2">
+<h2>Isolating a variable</h2>
+<p>I filtered the value 4 for Citizenship status, “US Citizen by naturalization”, to generate my sample population.</p>
+<pre class="r"><code>zhibaj_persondata &lt;- get_pums(variables = c( AGEP= &quot;AGEP&quot;, 
+                                      CIT = &quot;CIT&quot;, 
+                                      RACAIAN = &quot;RACAIAN&quot;,
+                                      RACASN = &quot;RACASN&quot;,
+                                      RACBLK = &quot;RACBLK&quot;,
+                                      RACSOR = &quot;RACSOR&quot;, 
+                                      RACWHT = &quot;RACWHT&quot;,
+                                      ESR = &quot;ESR&quot;,
+                                      SCHL = &quot;SCHL&quot;,
+                                      WAGP = &quot;WAGP&quot;,
+                                      YOEP = &quot;YOEP&quot;,
+                                      CITWP = &quot;CITWP&quot;),
                         state = &quot;CA&quot;, 
                         year = 2018, 
                         survey = &quot;acs1&quot;,
@@ -445,6 +458,9 @@ library(tidyverse)</code></pre>
   filter(CIT == 4) %&gt;%
   select(AGEP, CIT_label, RACAIAN, RACASN, RACBLK, RACSOR, RACWHT, ESR_label, SCHL_label, WAGP, YOEP, CITWP)</code></pre>
 <pre><code>## Getting data from the 2018 1-year ACS Public Use Microdata Sample</code></pre>
+</div>
+<div id="sneak-peek-of-the-code" class="section level2">
+<h2>Sneak peek of the code</h2>
 <pre class="r"><code>zhibaj_persondata</code></pre>
 <pre><code>## # A tibble: 56,490 x 12
 ##     AGEP CIT_label RACAIAN RACASN RACBLK RACSOR RACWHT ESR_label SCHL_label
