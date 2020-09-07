@@ -1,0 +1,70 @@
+---
+title: "200908_evictions Zhibaj"
+author: "Ana Zhibaj"
+date: "9/8/2020"
+output: html_document
+---
+
+```{r, message=FALSE}
+library(tidycensus)
+library(tidyverse)
+```
+
+## Dataset variables
+The dataset consists of county-level information on evictions for the state of California in 2015. I combined data from the ACS1 Census of 2015 and eviction data from the California Judicial Council. The variables are as follows:
+
+1. Median Age: Median_age
+2. Part of the civilian labor force population that is unemployed: Unemployed_labor
+3. Race
+4. Period of entry by Nativity: year_entry
+5. Reported cases of evictions: State_Reported_Cases
+
+```{r load area-level variables from ACS5 2015}
+pop_vars <- c(Median_age =           "B01002_001",
+              Unemployed_labor =       "B23025_005",
+              total_pop =         "B02001_001", 
+              white_alone =       "B03002_003",
+              black_AA_alone =    "B03002_004",
+              native_alone =      "B03002_005",
+              asian_alone =       "B03002_006",
+              hawaiian_PI_alone = "B03002_007",
+              other =             "B03002_008",
+              mult_races =        "B03002_009",
+              hispanic_latino =   "B03002_012",
+              year_entry =      "B05005_001")
+countyCA2015 <- get_acs(geography= "county", 
+              variables = pop_vars, 
+              output = "wide", 
+              state = "CA",
+              year = 2015, 
+              survey = "acs5")
+```
+
+```{r Define countyCA as dataframe}
+countyCA <- data.frame(countyCA2015)
+```
+
+
+```{r Load eviction data from the California Judicial Council saved as a CSV}
+eviction_dt <- read_csv("calistatsevictions_2.csv")
+```
+
+I tidied the CSV by removing columns I wasn't interested in. 
+
+```{r}
+eviction_dt <- eviction_dt %>%
+  filter(year == 2015)
+```
+
+```{r Define Eviction_data as dataframe}
+Eviction_data <- data.frame(eviction_dt) 
+```
+
+
+```{r Join dataframes}
+Eviction_CA <- inner_join(countyCA, Eviction_data, by = "NAME")
+```
+
+```{r}
+Eviction_CA
+```

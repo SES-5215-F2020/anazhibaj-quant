@@ -1,0 +1,340 @@
+﻿year,state,NAME,id,State_Reported_Evictions
+2010,California,"Alameda County, California",6001,7984
+2011,California,"Alameda County, California",6001,7547
+2012,California,"Alameda County, California",6001,6556
+2013,California,"Alameda County, California",6001,6000
+2014,California,"Alameda County, California",6001,5544
+2015,California,"Alameda County, California",6001,4857
+2010,California,"Alpine County, California",6003,15
+2011,California,"Alpine County, California",6003,20
+2013,California,"Alpine County, California",6003,18
+2014,California,"Alpine County, California",6003,18
+2010,California,"Amador County, California",6005,112
+2011,California,"Amador County, California",6005,118
+2012,California,"Amador County, California",6005,122
+2013,California,"Amador County, California",6005,98
+2014,California,"Amador County, California",6005,108
+2015,California,"Amador County, California",6005,114
+2010,California,"Butte County, California",6007,1128
+2011,California,"Butte County, California",6007,1129
+2012,California,"Butte County, California",6007,1026
+2013,California,"Butte County, California",6007,1012
+2014,California,"Butte County, California",6007,955
+2015,California,"Butte County, California",6007,916
+2010,California,"Calaveras County, California",6009,232
+2011,California,"Calaveras County, California",6009,218
+2012,California,"Calaveras County, California",6009,178
+2013,California,"Calaveras County, California",6009,141
+2014,California,"Calaveras County, California",6009,143
+2015,California,"Calaveras County, California",6009,122
+2010,California,"Colusa County, California",6011,46
+2011,California,"Colusa County, California",6011,64
+2012,California,"Colusa County, California",6011,48
+2013,California,"Colusa County, California",6011,39
+2014,California,"Colusa County, California",6011,35
+2015,California,"Colusa County, California",6011,41
+2010,California,"Contra Costa County, California",6013,6068
+2011,California,"Contra Costa County, California",6013,5772
+2012,California,"Contra Costa County, California",6013,4947
+2013,California,"Contra Costa County, California",6013,4346
+2014,California,"Contra Costa County, California",6013,3922
+2015,California,"Contra Costa County, California",6013,3517
+2010,California,"Del Norte County, California",6015,134
+2011,California,"Del Norte County, California",6015,162
+2012,California,"Del Norte County, California",6015,134
+2013,California,"Del Norte County, California",6015,112
+2014,California,"Del Norte County, California",6015,117
+2015,California,"Del Norte County, California",6015,110
+2010,California,"El Dorado County, California",6017,787
+2011,California,"El Dorado County, California",6017,673
+2012,California,"El Dorado County, California",6017,588
+2013,California,"El Dorado County, California",6017,577
+2014,California,"El Dorado County, California",6017,565
+2015,California,"El Dorado County, California",6017,536
+2010,California,"Fresno County, California",6019,5993
+2011,California,"Fresno County, California",6019,5757
+2012,California,"Fresno County, California",6019,5290
+2013,California,"Fresno County, California",6019,4796
+2014,California,"Fresno County, California",6019,4614
+2015,California,"Fresno County, California",6019,4492
+2010,California,"Glenn County, California",6021,56
+2011,California,"Glenn County, California",6021,31
+2012,California,"Glenn County, California",6021,107
+2013,California,"Glenn County, California",6021,83
+2014,California,"Glenn County, California",6021,30
+2015,California,"Glenn County, California",6021,48
+2010,California,"Humboldt County, California",6023,529
+2011,California,"Humboldt County, California",6023,532
+2012,California,"Humboldt County, California",6023,474
+2013,California,"Humboldt County, California",6023,512
+2014,California,"Humboldt County, California",6023,522
+2015,California,"Humboldt County, California",6023,570
+2010,California,"Imperial County, California",6025,685
+2011,California,"Imperial County, California",6025,529
+2012,California,"Imperial County, California",6025,618
+2013,California,"Imperial County, California",6025,450
+2014,California,"Imperial County, California",6025,424
+2015,California,"Imperial County, California",6025,359
+2010,California,"Inyo County, California",6027,36
+2011,California,"Inyo County, California",6027,36
+2012,California,"Inyo County, California",6027,36
+2013,California,"Inyo County, California",6027,30
+2014,California,"Inyo County, California",6027,33
+2015,California,"Inyo County, California",6027,47
+2010,California,"Kern County, California",6029,5813
+2011,California,"Kern County, California",6029,5911
+2012,California,"Kern County, California",6029,5570
+2013,California,"Kern County, California",6029,5098
+2014,California,"Kern County, California",6029,4793
+2015,California,"Kern County, California",6029,4703
+2010,California,"Kings County, California",6031,628
+2011,California,"Kings County, California",6031,644
+2012,California,"Kings County, California",6031,600
+2013,California,"Kings County, California",6031,597
+2014,California,"Kings County, California",6031,515
+2015,California,"Kings County, California",6031,515
+2010,California,"Lake County, California",6033,440
+2011,California,"Lake County, California",6033,404
+2012,California,"Lake County, California",6033,406
+2013,California,"Lake County, California",6033,426
+2014,California,"Lake County, California",6033,404
+2015,California,"Lake County, California",6033,415
+2010,California,"Lassen County, California",6035,116
+2011,California,"Lassen County, California",6035,124
+2012,California,"Lassen County, California",6035,143
+2013,California,"Lassen County, California",6035,126
+2014,California,"Lassen County, California",6035,104
+2015,California,"Lassen County, California",6035,100
+2010,California,"Los Angeles County, California",6037,67768
+2011,California,"Los Angeles County, California",6037,67182
+2012,California,"Los Angeles County, California",6037,61110
+2013,California,"Los Angeles County, California",6037,56354
+2014,California,"Los Angeles County, California",6037,55160
+2015,California,"Los Angeles County, California",6037,51203
+2010,California,"Madera County, California",6039,701
+2011,California,"Madera County, California",6039,660
+2012,California,"Madera County, California",6039,499
+2013,California,"Madera County, California",6039,509
+2014,California,"Madera County, California",6039,451
+2015,California,"Madera County, California",6039,431
+2010,California,"Marin County, California",6041,673
+2011,California,"Marin County, California",6041,658
+2012,California,"Marin County, California",6041,540
+2013,California,"Marin County, California",6041,452
+2014,California,"Marin County, California",6041,435
+2015,California,"Marin County, California",6041,409
+2010,California,"Mariposa County, California",6043,55
+2011,California,"Mariposa County, California",6043,50
+2012,California,"Mariposa County, California",6043,48
+2013,California,"Mariposa County, California",6043,44
+2014,California,"Mariposa County, California",6043,40
+2015,California,"Mariposa County, California",6043,41
+2010,California,"Mendocino County, California",6045,320
+2011,California,"Mendocino County, California",6045,353
+2012,California,"Mendocino County, California",6045,297
+2013,California,"Mendocino County, California",6045,323
+2014,California,"Mendocino County, California",6045,297
+2015,California,"Mendocino County, California",6045,289
+2010,California,"Merced County, California",6047,1635
+2011,California,"Merced County, California",6047,1446
+2012,California,"Merced County, California",6047,1374
+2013,California,"Merced County, California",6047,1211
+2014,California,"Merced County, California",6047,1096
+2015,California,"Merced County, California",6047,1006
+2010,California,"Modoc County, California",6049,10
+2011,California,"Modoc County, California",6049,21
+2012,California,"Modoc County, California",6049,23
+2013,California,"Modoc County, California",6049,17
+2015,California,"Modoc County, California",6049,13
+2010,California,"Mono County, California",6051,17
+2011,California,"Mono County, California",6051,31
+2012,California,"Mono County, California",6051,23
+2013,California,"Mono County, California",6051,24
+2014,California,"Mono County, California",6051,13
+2015,California,"Mono County, California",6051,25
+2010,California,"Monterey County, California",6053,1606
+2011,California,"Monterey County, California",6053,1436
+2012,California,"Monterey County, California",6053,1221
+2013,California,"Monterey County, California",6053,1047
+2014,California,"Monterey County, California",6053,960
+2015,California,"Monterey County, California",6053,922
+2010,California,"Napa County, California",6055,447
+2011,California,"Napa County, California",6055,395
+2012,California,"Napa County, California",6055,335
+2013,California,"Napa County, California",6055,288
+2014,California,"Napa County, California",6055,273
+2015,California,"Napa County, California",6055,269
+2012,California,"Nevada County, California",6057,245
+2013,California,"Nevada County, California",6057,221
+2014,California,"Nevada County, California",6057,206
+2015,California,"Nevada County, California",6057,238
+2010,California,"Orange County, California",6059,15065
+2011,California,"Orange County, California",6059,14052
+2012,California,"Orange County, California",6059,12573
+2013,California,"Orange County, California",6059,11305
+2014,California,"Orange County, California",6059,11321
+2015,California,"Orange County, California",6059,10816
+2010,California,"Placer County, California",6061,1439
+2011,California,"Placer County, California",6061,1298
+2012,California,"Placer County, California",6061,991
+2013,California,"Placer County, California",6061,853
+2014,California,"Placer County, California",6061,823
+2015,California,"Placer County, California",6061,740
+2010,California,"Plumas County, California",6063,54
+2011,California,"Plumas County, California",6063,69
+2012,California,"Plumas County, California",6063,61
+2013,California,"Plumas County, California",6063,68
+2014,California,"Plumas County, California",6063,52
+2015,California,"Plumas County, California",6063,51
+2010,California,"Riverside County, California",6065,17451
+2011,California,"Riverside County, California",6065,19305
+2012,California,"Riverside County, California",6065,13776
+2013,California,"Riverside County, California",6065,12530
+2014,California,"Riverside County, California",6065,11577
+2015,California,"Riverside County, California",6065,11147
+2010,California,"Sacramento County, California",6067,12492
+2011,California,"Sacramento County, California",6067,11413
+2012,California,"Sacramento County, California",6067,10259
+2013,California,"Sacramento County, California",6067,10132
+2014,California,"Sacramento County, California",6067,9395
+2015,California,"Sacramento County, California",6067,8380
+2010,California,"San Benito County, California",6069,216
+2011,California,"San Benito County, California",6069,177
+2012,California,"San Benito County, California",6069,146
+2013,California,"San Benito County, California",6069,123
+2014,California,"San Benito County, California",6069,138
+2015,California,"San Benito County, California",6069,111
+2010,California,"San Bernardino County, California",6071,19413
+2011,California,"San Bernardino County, California",6071,17801
+2012,California,"San Bernardino County, California",6071,16070
+2013,California,"San Bernardino County, California",6071,14500
+2014,California,"San Bernardino County, California",6071,13758
+2015,California,"San Bernardino County, California",6071,13023
+2010,California,"San Diego County, California",6073,15415
+2011,California,"San Diego County, California",6073,14575
+2012,California,"San Diego County, California",6073,13273
+2013,California,"San Diego County, California",6073,11977
+2014,California,"San Diego County, California",6073,11210
+2015,California,"San Diego County, California",6073,10656
+2010,California,"San Francisco County, California",6075,6628
+2011,California,"San Francisco County, California",6075,5212
+2012,California,"San Francisco County, California",6075,3784
+2013,California,"San Francisco County, California",6075,3310
+2014,California,"San Francisco County, California",6075,3512
+2015,California,"San Francisco County, California",6075,3004
+2010,California,"San Joaquin County, California",6077,4791
+2011,California,"San Joaquin County, California",6077,4471
+2012,California,"San Joaquin County, California",6077,3986
+2013,California,"San Joaquin County, California",6077,3799
+2014,California,"San Joaquin County, California",6077,3781
+2015,California,"San Joaquin County, California",6077,3527
+2010,California,"San Luis Obispo County, California",6079,869
+2011,California,"San Luis Obispo County, California",6079,703
+2012,California,"San Luis Obispo County, California",6079,679
+2013,California,"San Luis Obispo County, California",6079,608
+2014,California,"San Luis Obispo County, California",6079,550
+2015,California,"San Luis Obispo County, California",6079,455
+2010,California,"San Mateo County, California",6081,2122
+2011,California,"San Mateo County, California",6081,1981
+2012,California,"San Mateo County, California",6081,1872
+2013,California,"San Mateo County, California",6081,1590
+2014,California,"San Mateo County, California",6081,1562
+2015,California,"San Mateo County, California",6081,1396
+2010,California,"Santa Barbara County, California",6083,1258
+2011,California,"Santa Barbara County, California",6083,1261
+2012,California,"Santa Barbara County, California",6083,1212
+2013,California,"Santa Barbara County, California",6083,1074
+2014,California,"Santa Barbara County, California",6083,1085
+2015,California,"Santa Barbara County, California",6083,1022
+2010,California,"Santa Clara County, California",6085,5578
+2011,California,"Santa Clara County, California",6085,5130
+2012,California,"Santa Clara County, California",6085,4329
+2013,California,"Santa Clara County, California",6085,3811
+2014,California,"Santa Clara County, California",6085,3602
+2015,California,"Santa Clara County, California",6085,3133
+2010,California,"Santa Cruz County, California",6087,765
+2011,California,"Santa Cruz County, California",6087,682
+2012,California,"Santa Cruz County, California",6087,626
+2013,California,"Santa Cruz County, California",6087,480
+2014,California,"Santa Cruz County, California",6087,488
+2015,California,"Santa Cruz County, California",6087,482
+2010,California,"Shasta County, California",6089,857
+2011,California,"Shasta County, California",6089,881
+2012,California,"Shasta County, California",6089,852
+2013,California,"Shasta County, California",6089,796
+2014,California,"Shasta County, California",6089,668
+2015,California,"Shasta County, California",6089,651
+2010,California,"Sierra County, California",6091,10
+2012,California,"Sierra County, California",6091,13
+2010,California,"Siskiyou County, California",6093,141
+2011,California,"Siskiyou County, California",6093,173
+2012,California,"Siskiyou County, California",6093,168
+2013,California,"Siskiyou County, California",6093,198
+2014,California,"Siskiyou County, California",6093,177
+2015,California,"Siskiyou County, California",6093,214
+2010,California,"Solano County, California",6095,3063
+2011,California,"Solano County, California",6095,2882
+2012,California,"Solano County, California",6095,2541
+2013,California,"Solano County, California",6095,2426
+2014,California,"Solano County, California",6095,2409
+2015,California,"Solano County, California",6095,2128
+2010,California,"Sonoma County, California",6097,1865
+2011,California,"Sonoma County, California",6097,1785
+2012,California,"Sonoma County, California",6097,1483
+2013,California,"Sonoma County, California",6097,1221
+2014,California,"Sonoma County, California",6097,1200
+2015,California,"Sonoma County, California",6097,1165
+2010,California,"Stanislaus County, California",6099,3395
+2011,California,"Stanislaus County, California",6099,3268
+2012,California,"Stanislaus County, California",6099,2729
+2013,California,"Stanislaus County, California",6099,2511
+2014,California,"Stanislaus County, California",6099,2422
+2015,California,"Stanislaus County, California",6099,2210
+2010,California,"Sutter County, California",6101,436
+2011,California,"Sutter County, California",6101,478
+2012,California,"Sutter County, California",6101,456
+2013,California,"Sutter County, California",6101,444
+2014,California,"Sutter County, California",6101,382
+2015,California,"Sutter County, California",6101,320
+2010,California,"Tehama County, California",6103,399
+2011,California,"Tehama County, California",6103,363
+2012,California,"Tehama County, California",6103,352
+2013,California,"Tehama County, California",6103,330
+2014,California,"Tehama County, California",6103,294
+2015,California,"Tehama County, California",6103,373
+2010,California,"Trinity County, California",6105,29
+2011,California,"Trinity County, California",6105,38
+2012,California,"Trinity County, California",6105,25
+2013,California,"Trinity County, California",6105,43
+2014,California,"Trinity County, California",6105,42
+2015,California,"Trinity County, California",6105,50
+2010,California,"Tulare County, California",6107,2316
+2011,California,"Tulare County, California",6107,2291
+2012,California,"Tulare County, California",6107,2164
+2013,California,"Tulare County, California",6107,1898
+2014,California,"Tulare County, California",6107,1920
+2015,California,"Tulare County, California",6107,1773
+2010,California,"Tuolumne County, California",6109,259
+2011,California,"Tuolumne County, California",6109,223
+2012,California,"Tuolumne County, California",6109,204
+2013,California,"Tuolumne County, California",6109,208
+2014,California,"Tuolumne County, California",6109,170
+2015,California,"Tuolumne County, California",6109,230
+2010,California,"Ventura County, California",6111,3204
+2011,California,"Ventura County, California",6111,3049
+2012,California,"Ventura County, California",6111,2727
+2013,California,"Ventura County, California",6111,2406
+2014,California,"Ventura County, California",6111,2445
+2015,California,"Ventura County, California",6111,2278
+2010,California,"Yolo County, California",6113,838
+2011,California,"Yolo County, California",6113,812
+2012,California,"Yolo County, California",6113,646
+2013,California,"Yolo County, California",6113,591
+2014,California,"Yolo County, California",6113,549
+2015,California,"Yolo County, California",6113,533
+2010,California,"Yuba County, California",6115,525
+2011,California,"Yuba County, California",6115,477
+2012,California,"Yuba County, California",6115,439
+2013,California,"Yuba County, California",6115,490
+2014,California,"Yuba County, California",6115,464
+2015,California,"Yuba County, California",6115,361
