@@ -1,0 +1,92 @@
+---
+title: "200907_persondata"
+author: "Ana Zhibaj"
+date: "9/7/2020"
+output: html_document
+---
+```{r Load libraries}
+library(tidycensus)
+library(tidyverse)
+```
+
+## Dataset variables
+I am interested in person-level data, that is why I'll use variables from the 2018 ASC1 dataset for the state of California. The variables are as follows:
+
+                **Name**                 |    **Code**    | **Type**
+---------------------------------------- | -------------- | --------
+Age                                      | Content Cell   |   Type
+Citizenship status                       | Content Cell   |   Type
+Race: American Indian and Alaska Native  | Content Cell   |   Type
+Wages/Salary income past 12 months       | Content cell   |   Type
+
+1. Age: AGEP
+2. Citizenship status: CIT
+3. Race
+  + American Indian and Alaska Native: RACAIAN
+  + Asian: RACASN
+  + Black: RACBLK
+  + Other race: RACSOR
+  + White: RACWHT
+4. Employment status recode: ESR
+5. Educational attainment: SCHL
+6. Wages/salary income past 12 months: WAGP
+7. Year of Entry: YOEP
+8. 
+
+```{r load person-level microdata variables}
+person_vars_2018 <- pums_variables %>%
+  distinct(year, survey, var_code,
+           var_label, data_type, level) %>%
+  filter(level == "person", year == 2018, survey == "acs1")
+```
+
+```{r, results = 'hide'}
+person_population <- get_pums(variables = c("AGEP", 
+                                      "CIT", 
+                                      "RACAIAN",
+                                      "RACASN",
+                                      "RACBLK",
+                                      "RACSOR", 
+                                      "RACWHT",
+                                      "ESR",
+                                      "SCHL",
+                                      "WAGP",
+                                      "YOEP",
+                                      "CITWP"),
+                        state = "CA", 
+                        year = 2018, 
+                        survey = "acs1",
+                        recode = TRUE) %>%
+  select(AGEP, CIT_label, RACAIAN, RACASN, RACBLK, RACSOR, RACWHT, ESR_label, SCHL_label, WAGP, YOEP, CITWP)
+```
+
+```{r Creating the population for the dataset}
+total_pop <- nrow(person_population)
+```
+
+
+```{r load person-level data, results = 'hide'}
+zhibaj_persondata <- get_pums(variables = c("AGEP", 
+                                      "CIT", 
+                                      "RACAIAN",
+                                      "RACASN",
+                                      "RACBLK",
+                                      "RACSOR", 
+                                      "RACWHT",
+                                      "ESR",
+                                      "SCHL",
+                                      "WAGP",
+                                      "YOEP",
+                                      "CITWP"),
+                        state = "CA", 
+                        year = 2018, 
+                        survey = "acs1",
+                        recode = TRUE) %>%
+  filter(CIT == 4) %>%
+  select(AGEP, CIT_label, RACAIAN, RACASN, RACBLK, RACSOR, RACWHT, ESR_label, SCHL_label, WAGP, YOEP, CITWP)
+```
+
+```{r}
+zhibaj_persondata
+```
+
