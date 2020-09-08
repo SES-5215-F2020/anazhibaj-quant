@@ -1,47 +1,48 @@
 ---
-title: "200907_persondata"
+title: "Citizenship, class and race"
 author: "Ana Zhibaj"
-date: "9/7/2020"
+date: "9/8/2020"
 output: html_document
 ---
 ```{r Load libraries}
 library(tidycensus)
 library(tidyverse)
+library(dplyr)
 ```
 
 ## Dataset variables
-I am interested in class and citizenship on an individual level, that is why I'll use variables from the 2018 ASC1 dataset for the state of California. My sample population is citizens that have attained their citizenship by naturalization. I want to inspect how that status (and its period) compares, or corellates, to race and class. 
+I am interested in class and citizenship on an individual level, that is why I'll use variables from the 2018 ACS1 dataset for the state of California. My sample population is citizens that have attained their citizenship by naturalization. I want to inspect how that status (and its period) compares, or corellates, to race and class. 
 
 The variables are as follows:
 
-                  Name                   |      Code      |   Type 
------------------------------------------|----------------|---------
-Age                                      | AGEP           |   cont
-Citizenship status                       | CIT            |   catg
-Race: American Indian and Alaska Native  | RACAIAN        |   catg
-Race: Asian                              | RACASN         |   catg
-Race: Black                              | RACBLK         |   catg
-Other Race                               | RACSOR         |   catg
-Race: White                              | RACWHT         |   catg
-Employment status recode                 | ESR            |   catg
-Educational attainment                   | SCHL           |   catg
-Wages/Salary income past 12 months       | WAGP           |   cont
-Year of entry                            | YOEP           |   cont
-Year of naturalization                   | CITWP          |   cont
+``` {r variable list, echo=FALSE} 
+variables_list <- tibble(Name = c("Age", 
+                           "Citizenship Status",
+                           "Race",
+                           "Employment",
+                           "Education",
+                           "Income",
+                           "Year of Entry",
+                           "Year of naturalization"),
+                         Code = c("AGEP",
+                           "CIT",
+                           "RACEAIN, RACASN, RACBLK, RACSOR, RACWHT",
+                           "ESR",
+                           "SCHL",
+                           "WAGP",
+                           "YOEP",
+                           "CITWP"),
+                         Type = c("cont",
+                                  "cat",
+                                  "cat",
+                                  "cat",
+                                  "cat",
+                                  "cont",
+                                  "cont",
+                                  "cont"))
+knitr::kable(variables_list)
+``` 
 
-1. Age: AGEP
-2. Citizenship status: CIT
-3. Race
-  + American Indian and Alaska Native: RACAIAN
-  + Asian: RACASN
-  + Black: RACBLK
-  + Other race: RACSOR
-  + White: RACWHT
-4. Employment status recode: ESR
-5. Educational attainment: SCHL
-6. Wages/salary income past 12 months: WAGP
-7. Year of Entry: YOEP
-8. Year of Naturalization: CITWP
 
 ## Uploading the person-level microdata variables from the 2018 ACS1 census
 
@@ -100,13 +101,24 @@ zhibaj_persondata <- get_pums(variables = c( AGEP= "AGEP",
                         year = 2018, 
                         survey = "acs1",
                         recode = TRUE) %>%
+  filter(AGEP > 18) %>%
   filter(CIT == 4) %>%
-  select(AGEP, CIT_label, RACAIAN, RACASN, RACBLK, RACSOR, RACWHT, ESR_label, SCHL_label, WAGP, YOEP, CITWP)
+  mutate(years_to_nat = CITWP - YOEP) %>%
+  filter(ESR == 1:6) %>%
+  filter(years_to_nat > 0) %>%
+  select(AGEP, RACAIAN, RACASN, RACBLK, RACSOR, RACWHT, ESR_label, SCHL_label, WAGP, YOEP, CITWP, years_to_nat)
 ```
 ## Sneak peek of the code 
 
 ```{r}
 zhibaj_persondata
 ```
+
+## Saving the dataset
+
+```{r}
+write.csv(zhibaj_persondata, "Citizenship-class-race.csv")
+```
+
 
 
