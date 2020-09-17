@@ -1,0 +1,327 @@
+#Assignment 2
+
+---
+author: "Ana Zhibaj"
+date: "9/11/2020"
+output: html_document
+---
+
+##Setting up the workspace
+
+I initially installed tidyverse and ggplot2 libraries.
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+library(wesanderson)
+```
+
+I loaded the data I created for the last assignment, that aim to explore the relationship between citizenship, class and race. 
+
+```{r}
+citizenship_data <- read_csv("Citizenship-class-race.csv")
+attach(citizenship_data)
+```
+
+Fret not if you can't remember the variables. That's why I formatted them on this nice table:  
+
+``` {r variable list, echo=FALSE} 
+variables_list <- tibble(Name = c("Age", 
+                           "Citizenship Status",
+                           "Race",
+                           "Employment",
+                           "Education",
+                           "Income",
+                           "Year of Entry",
+                           "Year of naturalization"),
+                         Code = c("AGEP",
+                           "CIT",
+                           "RACEAIN, RACASN, RACBLK, RACSOR, RACWHT",
+                           "ESR",
+                           "SCHL",
+                           "WAGP",
+                           "YOEP",
+                           "CITWP"),
+                         Type = c("cont",
+                                  "cat",
+                                  "cat",
+                                  "cat",
+                                  "cat",
+                                  "cont",
+                                  "cont",
+                                  "cont"))
+knitr::kable(variables_list)
+``` 
+
+##Visualizing the distribution of continuous variables
+
+Next, I will use the summary function for the continuous variables: Age, Income, Year of Entry, and Period of Naturalization. I will use t.test to get a 95% confidence interval for the population mean. I will use the color palette from Agnes Varda's "Uncle Yanco", a short documentary she directed in 1967 that depicts the life of a distant relative. 
+
+```{r}
+age_summary <- summary(AGEP)
+age_sd <- sd(AGEP, na.rm = TRUE)
+age_pop_mean_int <- t.test(AGEP)
+income_summary <- summary(WAGP)
+income_sd <- sd(WAGP, na.rm = TRUE)
+income_pop_mean_int <- t.test(WAGP)
+year_entry_summary <- summary(YOEP)
+year_entry_sd <- sd(YOEP, na.rm = TRUE)
+year_entry_pop_mean_int <- t.test(YOEP)
+periodnat_summary <- summary(years_to_nat)
+periodnat_sd <- sd(years_to_nat, na.rm = TRUE)
+periodnat_pop_mean_int <- t.test(years_to_nat)
+```
+
+I'll format my findings in a pleasant table. 
+
+```{r}
+summary_table <- tibble(Statistic = c("Sample mean", 
+                "Median",
+                "Standard deviation",
+                "Interquartile range",
+                "Population mean (95% confidence)"),
+  `Median age (years)` = c(prettyNum(age_summary["Mean"], digits=3),
+                           age_summary["Median"],
+                           prettyNum(age_sd, digits = 3),
+                           paste(age_summary["1st Qu."],"to", 
+                                 age_summary["3rd Qu."]),
+                           paste(prettyNum(age_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(age_pop_mean_int$conf.int[2],
+                                               digits=3))),
+    `Income` = c(prettyNum(income_summary["Mean"], digits=3),
+                           income_summary["Median"],
+                           prettyNum(income_sd, digits = 3),
+                           paste(income_summary["1st Qu."],"to", 
+                                 income_summary["3rd Qu."]),
+                           paste(prettyNum(income_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(income_pop_mean_int$conf.int[2],
+                                               digits=3))))
+knitr::kable(summary_table,
+             caption = "Summary")
+```
+
+##Histograms
+
+I will use ggplot2 to create a histogram for the distribution. The color selection is inspired by Vardas "Uncle Yanco". 
+
+###Age
+
+```{r}
+ggplot(citizenship_data, aes(x = AGEP)) +
+  geom_histogram(color = "white", binwidth = 2, fill = "red 2") +
+  theme_classic() +
+  scale_x_continuous(name = "Age (in years)") +
+  scale_y_continuous(name = "Number of people in sample")
+```
+
+
+
+###Income
+
+```{r}
+ggplot(citizenship_data, aes(x = WAGP)) +
+  geom_histogram(color = "white", binwidth = 200000, fill = "darkorchid4") +
+  theme_classic() +
+  scale_x_continuous(name = "Wage") +
+  scale_y_continuous(name = "Number of people in sample")
+```
+###Period of naturalization
+
+```{r}
+ggplot(citizenship_data, aes(x = years_to_nat)) +
+  geom_histogram(color = "white", binwidth = 1, fill = "gold1") +
+  theme_classic() +
+  scale_x_continuous(name = "Period of naturalization") +
+  scale_y_continuous(name = "Number of people in sample")
+```
+
+```{r}
+summary(years_to_nat)
+```
+
+```{r}
+paste("The sample mean for period of naturalization is",
+      prettyNum(mean(years_to_nat), digits = 0), "years.")
+paste("The sample median for period of naturalization is",
+      prettyNum(median(years_to_nat), digits = 0,), "years.")
+paste("The sample standard deviation for period of naturalization is",
+      prettyNum(sd(years_to_nat), digits = 0), "years")
+paste("The sample interquartile range for period of naturalization is",
+      quantile(years_to_nat)["25%"], "to", quantile(years_to_nat)["75%"], "years.")
+```
+
+What about the t.test? 
+
+```{r}
+pop_mean <- t.test(years_to_nat)
+pop_mean
+```
+```{r}
+hist <- ggplot(citizenship_data, aes(x = years_to_nat)) + 
+  geom_histogram(
+    binwidth = 1
+  )
+
+hist + 
+  theme_classic() +
+  scale_x_continuous(name = "Period of citizenship by naturalization (years)") +
+  scale_y_continuous(name = "Number of people in sample") +
+  geom_histogram(color = "white", binwidth = 1, fill = "navajowhite3") +
+  annotate("text", x = 30, y = 1000, size = 3, 
+           label = paste("Population mean (95% confidence):",
+                         prettyNum(pop_mean$conf.int[1], digits = 3),
+                         "to",
+                         prettyNum(pop_mean$conf.int[2], digits = 3),
+                         "years.",
+                         "\nSample mean:", 
+                         prettyNum(mean(years_to_nat), digits = 0), "years.",
+                         "\nSample median:",
+                         prettyNum(median(years_to_nat), digits = 0), "years.",
+                         "\nSample standard deviation:",
+                         prettyNum(sd(years_to_nat), digits = 0), "years.", 
+                         "\nSample interquartile range:",
+                         prettyNum(quantile(years_to_nat)["25%"], digits = 0),
+                         "to",
+                         prettyNum(quantile(years_to_nat)["75%"], digits = 0),
+                         "years."),
+           hjust = 0, vjust = 1)
+```
+
+
+##Visualizing the distribution of categorical variables
+
+
+###Employment
+
+Let's calculate the shares for each of the categories of employment. 
+```{r}
+employment <- unique(ESR_label)
+employment
+```
+
+```{r}
+not_in_labor_force <- t.test(ESR_label == employment [1])
+civ_empl_work <- t.test(ESR_label == employment [2])
+armed_forces_work <- t.test(ESR_label == employment [3])
+unemployed <- t.test(ESR_label == employment [4])
+civ_empl_not_work <- t.test(ESR_label == employment [5])
+
+shares_employment <- tibble(Employment = c("Not in labor force", 
+                            "Civilian employed, at work", 
+                            "Armed forces, at work",
+                            "Unemployed",
+                            "Civilian employed, but not at work"),
+                 `Share` = c(not_in_labor_force$estimate, 
+                             civ_empl_work$estimate,
+                             armed_forces_work$estimate,
+                             unemployed$estimate,
+                             civ_empl_not_work$estimate),
+                 Low = c(not_in_labor_force$conf.int[1],
+                         civ_empl_work$conf.int[1],
+                          armed_forces_work$conf.int[1],
+                         unemployed$conf.int[1],
+                         civ_empl_not_work$conf.int[1]),
+                 High = c(not_in_labor_force$conf.int[2],
+                         civ_empl_work$conf.int[2],
+                          armed_forces_work$conf.int[2],
+                         unemployed$conf.int[2],
+                         civ_empl_not_work$conf.int[2]))
+shares_employment
+```
+
+I will visualize these results with a bar chart. 
+
+```{r}
+ggplot(shares_employment, aes(x = Employment, y = Share, ymin = Low, ymax = High)) +
+  geom_bar(stat = "identity") +
+  geom_errorbar(width = 0.5) +
+  theme_classic() +
+   theme(axis.text.x = element_text(angle = 90)) +
+  scale_y_continuous(name = "Share of population (error bar 95-percent confidence interval)",
+                     breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+                     labels = c("0", "10%", "20%", "30%", "40%", "50%"))
+```
+
+###Level of education
+
+```{r}
+education <- unique(SCHL_label)
+education
+```
+
+```{r}
+no_schooling <- t.test(SCHL_label == education [1])
+some_college <- t.test(SCHL_label == education [2])
+high_school <- t.test(SCHL_label == education [5])
+associate_degree <- t.test(SCHL_label == education [6])
+college_1 <- t.test(SCHL_label == education [8])
+ged <- t.test(SCHL_label == education [9])
+masters <- t.test(SCHL_label == education [10])
+bachelors <- t.test(SCHL_label == education [15])
+prof_degree <- t.test(SCHL_label == education [19])
+doctorate <- t.test(SCHL_label == education [20])
+
+shares_education <- tibble(Education = c("No schooling", 
+                            "Some college, but less than 1 year",
+                            "Regular high school diploma",
+                            "Associate's degree",
+                            "1 or more years of college credit, no degree",
+                            "GED",
+                            "Master's degree",
+                            "Bachelor's degree",
+                            "Professional degree beyond a bachelor's degree",
+                            "Doctorate degree"),
+                 `Share` = c(no_schooling$estimate, 
+                             some_college$estimate,
+                             high_school$estimate,
+                             associate_degree$estimate,
+                             college_1$estimate,
+                             ged$estimate,
+                             masters$estimate,
+                             bachelors$estimate,
+                             prof_degree$estimate,
+                             doctorate$estimate),
+                 Low = c(no_schooling$conf.int[1],
+                         some_college$conf.int[1],
+                          high_school$conf.int[1],
+                         associate_degree$conf.int[1],
+                         college_1$conf.int[1],
+                         ged$conf.int[1],
+                         masters$conf.int[1],
+                         bachelors$conf.int[1],
+                         prof_degree$conf.int[1],
+                         doctorate$conf.int[1]),
+                 High = no_schooling$conf.int[2],
+                         some_college$conf.int[2],
+                          high_school$conf.int[2],
+                         associate_degree$conf.int[2],
+                         college_1$conf.int[2],
+                         ged$conf.int[2],
+                         masters$conf.int[2],
+                         bachelors$conf.int[2],
+                         prof_degree$conf.int[2],
+                         doctorate$conf.int[2])
+shares_education
+```
+
+I will visualize these results with a bar chart. 
+
+```{r}
+ggplot(shares_education, aes(x = Education, y = Share, ymin = Low, ymax = High)) +
+  geom_bar(stat = "identity") +
+  geom_errorbar(width = 0.5) +
+  theme_classic() +
+  scale_y_continuous(name = "Share of population (error bar 95-percent confidence interval)",
+                     breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+                     labels = c("0", "10%", "20%", "30%", "40%", "50%")) +
+  coord_flip()
+```
+
+
+
+
+
