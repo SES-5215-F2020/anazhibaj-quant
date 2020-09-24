@@ -1,0 +1,458 @@
+# Assignment 3
+
+---
+author: "Ana Zhibaj"
+output:
+html_document:
+toc = true
+toc_float = true
+highlight = tango
+
+---
+
+```{r, message = FALSE}
+library(tidyverse)
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+library(wesanderson)
+library(skimr)
+library(cowplot)
+library(flexdashboard)
+library(shiny)
+```
+
+I aim to explore the relationship between citizenship, class, and race. I have updated the csv file from the last assignment, to mutate all the race variables into one. 
+
+```{r, message=FALSE}
+citizenship_data <- read_csv("Citizenship-class-race-updated.csv")
+attach(citizenship_data)
+```
+
+Quick reminder of the variables: 
+
+``` {r variable list, echo=FALSE} 
+variables_list <- tibble(Name = c("Age", 
+                           "Race",
+                           "Employment",
+                           "Education",
+                           "Income",
+                           "Year of Entry",
+                           "Period of Naturalization"),
+                         Code = c("AGEP",
+                           "RACE",
+                           "ESR",
+                           "SCHL",
+                           "WAGP",
+                           "YOEP",
+                           "years_to_nat"),
+                         Type = c("cont",
+                                  "catg",
+                                  "catg",
+                                  "catg",
+                                  "cont",
+                                  "cont",
+                                  "cont"))
+knitr::kable(variables_list)
+``` 
+```{r}
+skimr::skim(citizenship_data)
+```
+
+
+## Correlation tests for the continuous variables
+
+I will run three correlation tests for age and income, age and period of naturalization, income and period of naturalization. 
+
+### Age and Income correlation test
+
+```{r}
+correlation_age_income <- cor.test(citizenship_data$AGEP, citizenship_data$WAGP)
+correlation_age_income
+```
+Let's visualize the results in ggplot. 
+
+```{r}
+summary(WAGP)
+```
+
+```{r y cont}
+options(scipen = 999)
+ggplot(citizenship_data, aes(x = AGEP, y = WAGP)) +
+  geom_point(size = 0.3, alpha = 0.1, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Age") +
+ scale_y_continuous(name = "Income", 
+                     breaks = seq(0, 565000, by = 50000),
+                     labels = paste("$", 
+                                    prettyNum(seq(0, 565000, by = 50000),
+                                              big.mark = ","))) +
+  annotate(geom = "text", x = 0, y = 400000, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(correlation_age_income$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(correlation_age_income$conf.int[2], digits = 2)),
+           hjust = 0)
+```
+
+
+### Age and Period of naturalization correlation test
+
+```{r}
+correlation_age_periodnat <- cor.test(citizenship_data$years_to_nat, citizenship_data$AGEP)
+correlation_age_periodnat
+```
+
+```{r}
+summary(years_to_nat)
+```
+
+```{r}
+ggplot(citizenship_data, aes(x = years_to_nat, y = AGEP)) +
+  geom_point(size = 0.3, alpha = 0.1, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Period of naturalization (in years)") +
+ scale_y_continuous(name = "Age") +
+  annotate(geom = "text", x = 0, y = 100, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(correlation_age_income$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(correlation_age_income$conf.int[2], digits = 2)),
+           hjust = 0)
+```
+
+### Income and Period of Naturalization 
+
+```{r}
+correlation_income_period_nat <- cor.test(citizenship_data$years_to_nat, citizenship_data$WAGP)
+correlation_income_period_nat
+```
+
+
+```{r}
+options(scipen = 999)
+ggplot(citizenship_data, aes(x = years_to_nat, y = WAGP)) +
+  geom_point(size = 0.3, alpha = 0.2, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Period of naturalization (in years)") +
+ scale_y_continuous(name = "Income", 
+                     breaks = seq(0, 565000, by = 50000),
+                     labels = paste("$", 
+                                    prettyNum(seq(0, 565000, by = 50000),
+                                              big.mark = ","))) +
+  annotate(geom = "text", x = 0, y = 450000, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(correlation_income_period_nat$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(correlation_income_period_nat$conf.int[2], digits = 2)),
+           hjust = 0)
+```
+
+## Relationship of categorical variables and continuous variables
+
+I will run ANOVA tests for race and income, race and period of naturalization, race and age, income and education, period of naturalization and education, income and employment, period of naturalization and employment.
+
+
+
+### Race and Income 
+
+```{r}
+anova_race_income <- aov(WAGP ~ RACE, data = citizenship_data)
+
+summary(anova_race_income)
+```
+Running a Tukey's Honestly Significant Test, since the p value is less than 0.05.
+
+```{r}
+differences <- TukeyHSD(anova_race_income)
+
+as_tibble(cbind(pair = row.names(differences$RACE),
+                differences$RACE))
+```
+
+```{r}
+ggplot(citizenship_data, aes(x = RACE, y = WAGP)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Race") +
+  scale_y_continuous(name = "Income ($)", 
+                     breaks = seq(0, 565000, by = 50000),
+                     labels = paste(  prettyNum(seq(0, 565000, by = 50000),
+                                              big.mark = ","))) +
+  coord_flip()
+```
+
+### Race and Period of Naturalization 
+
+```{r}
+anova_race_period_nat <- aov(years_to_nat ~ RACE, data = citizenship_data)
+
+summary(anova_race_period_nat)
+```
+Running a Tukey's Honestly Significant Test, since the p value is less than 0.05.
+
+```{r}
+differences <- TukeyHSD(anova_race_period_nat)
+
+as_tibble(cbind(pair = row.names(differences$RACE),
+                differences$RACE))
+```
+
+```{r}
+ggplot(citizenship_data, aes(x = RACE, y = years_to_nat)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Race") +
+  scale_y_continuous(name = "Period of Naturalization", 
+                     breaks = seq(0, 100, by = 10),
+                     labels = paste(  prettyNum(seq(0, 100, by = 10),
+                                              big.mark = ","))) +
+  coord_flip()
+```
+
+### Race and Age 
+
+```{r}
+anova_race_age <- aov(AGEP ~ RACE, data = citizenship_data)
+
+summary(anova_race_age)
+```
+Running a Tukey's Honestly Significant Test, since the p value is less than 0.05.
+
+```{r}
+differences <- TukeyHSD(anova_race_age)
+
+as_tibble(cbind(pair = row.names(differences$RACE),
+                differences$RACE))
+```
+
+```{r}
+ggplot(citizenship_data, aes(x = RACE, y = AGEP)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Race") +
+  scale_y_continuous(name = "Age", 
+                     breaks = seq(0, 100, by = 10),
+                     labels = paste(  prettyNum(seq(0, 100, by = 10),
+                                              big.mark = ","))) +
+  coord_flip()
+```
+
+### Education and Income 
+
+```{r}
+summary(WAGP)
+```
+
+
+```{r}
+anova_edu_income <- aov(WAGP ~ SCHL_label, data = citizenship_data)
+
+summary(anova_edu_income)
+```
+Running a Tukey's Honestly Significant Test, since the p value is less than 0.05.
+
+```{r}
+differences <- TukeyHSD(anova_edu_income)
+
+as_tibble(cbind(pair = row.names(differences$SCHL_label),
+                differences$SCHL_label))
+```
+
+```{r}
+ggplot(citizenship_data, aes(x = SCHL_label, y = WAGP)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Education") +
+  scale_y_continuous(name = "Income ($)", 
+                     breaks = seq(0, 565000, by = 50000),
+                     labels = paste(  prettyNum(seq(0, 565000, by = 50000),
+                                              big.mark = ","))) +
+  coord_flip()
+```
+
+### Education and Period of Naturalization
+
+```{r}
+anova_edu_ped_nat <- aov(years_to_nat ~ SCHL_label, data = citizenship_data)
+
+summary(anova_edu_ped_nat)
+```
+
+```{r}
+differences <- TukeyHSD(anova_edu_ped_nat)
+
+as_tibble(cbind(pair = row.names(differences$SCHL_label),
+                differences$SCHL_label))
+```
+
+```{r}
+ggplot(citizenship_data, aes(x = SCHL_label, y = years_to_nat)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Education") +
+  scale_y_continuous(name = "Period of Naturalization", 
+                     breaks = seq(0, 100, by = 10),
+                     labels = paste(  prettyNum(seq(0, 100, by = 10),
+                                              big.mark = ","))) +
+  coord_flip()
+```
+
+### Employment and Income 
+
+```{r}
+anova_work_income <- aov(WAGP ~ ESR_label, data = citizenship_data)
+
+summary(anova_work_income)
+```
+Running a Tukey's Honestly Significant Test.
+
+```{r}
+differences <- TukeyHSD(anova_work_income)
+
+as_tibble(cbind(pair = row.names(differences$ESR_label),
+                differences$ESR_label))
+```
+
+```{r}
+ggplot(citizenship_data, aes(x = ESR_label, y = WAGP)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=90)) +
+  scale_x_discrete(name = "Employment") +
+   scale_y_continuous(name = "Income ($)", 
+                     breaks = seq(0, 565000, by = 50000),
+                     labels = paste(  prettyNum(seq(0, 565000, by = 50000),
+                                              big.mark = ","))) +
+  coord_flip()
+
+```
+
+### Employment and Period of Naturalization 
+
+```{r}
+anova_work_nat <- aov(years_to_nat ~ ESR_label, data = citizenship_data)
+summary(anova_work_nat)
+```
+Running a Tukey's Honestly Significant Test.
+
+```{r}
+differences <- TukeyHSD(anova_work_nat)
+
+as_tibble(cbind(pair = row.names(differences$ESR_label),
+                differences$ESR_label))
+```
+
+```{r}
+ggplot(citizenship_data, aes(x = ESR_label, y = years_to_nat)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=90)) +
+  scale_x_discrete(name = "Employment") +
+   scale_y_continuous(name = "Period of Naturalization", 
+                     breaks = seq(0, 100, by = 10),
+                     labels = paste(  prettyNum(seq(0, 100, by = 10),
+                                              big.mark = ","))) +
+  coord_flip()
+```
+## Chi-square tests
+
+### Race and Employment
+
+```{r}
+chi_sq_race_work <- chisq.test(citizenship_data$RACE, citizenship_data$ESR_label) 
+chi_sq_race_work
+```
+```{r}
+chi_sq_race_work$observed
+```
+
+```{r}
+chi_sq_race_work$expected
+```
+
+```{r}
+c_diff_rw <- chi_sq_race_work$observed - chi_sq_race_work$expected
+c_diff_rw_data <- as.data.frame(c_diff_rw)
+```
+
+```{r}
+c_diff_heatmap_rw <- ggplot(c_diff_rw_data,
+                         aes(x = citizenship_data.RACE,
+                             y = citizenship_data.ESR_label,
+                             fill = Freq)) +
+  geom_tile() +
+  scale_x_discrete(name = "Race") +
+  scale_y_discrete(name = "Employment") +
+  theme_cowplot() +
+ theme(legend.key.size =  unit(0.5, "cm"),
+        plot.title = element_text(hjust = 2),
+        axis.text.x = element_text(angle = 90, size = 5),
+        axis.text.y = element_text(size = 6),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 9)) +
+  scale_fill_gradient2(name = "Difference between \nobserved and \nexpected values",
+                       midpoint = 0,
+                       low = "purple",
+                       mid = "white",
+                       high = "orange",
+                       space = "Lab")
+c_diff_heatmap_rw
+```
+
+
+### Race and Education
+
+```{r}
+chi_sq_race_edu <- chisq.test(citizenship_data$RACE, citizenship_data$SCHL_label) 
+chi_sq_race_edu
+```
+
+```{r}
+chi_sq_race_edu$observed
+```
+
+```{r}
+chi_sq_race_edu$expected
+```
+
+```{r}
+c_diff_re <- chi_sq_race_edu$observed - chi_sq_race_edu$expected
+c_diff_re_data <- as.data.frame(c_diff_re)
+```
+
+```{r}
+c_diffheatmap_re <- ggplot(c_diff_re_data,
+                         aes(x = citizenship_data.RACE,
+                             y = citizenship_data.SCHL_label,
+                             fill = Freq)) +
+  geom_tile() +
+  scale_x_discrete(name = "Race") +
+  scale_y_discrete(name = "Education") +
+  theme_cowplot() +
+  theme(legend.key.size =  unit(0.5, "cm"),
+        plot.title = element_text(hjust = 2),
+        axis.text.x = element_text(angle = 90, size = 5),
+        axis.text.y = element_text(size = 6),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 9)) +
+  scale_fill_gradient2(name = "Difference between \nobserved and \nexpected values",
+                       midpoint = 0,
+                       low = "purple",
+                       mid = "white",
+                       high = "orange",
+                       space = "Lab")
+c_diffheatmap_re
+```
+
+
+
+
