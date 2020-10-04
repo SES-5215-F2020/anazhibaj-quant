@@ -1,0 +1,96 @@
+---
+title: "200929_Assignment 4"
+author: "Ana Zhibaj"
+date: "9/29/2020"
+output: html_document
+---
+
+This dataset explores the relationship between race, class and citizenship, for people that have gained American citizenship through naturalization. for people older than 18 years old. 
+
+
+Dependent variables: Income  
+Independent variables: Race, Education, Employment, Period of Citizenship. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load libraries, message=FALSE}
+library(tidyverse)
+```
+
+For Assignment 3, I mutated the data for the race variable (combined them into one). In this assignment, I binned some of the values of education into larger categorizations (the scale of information was not relevant for my research question, so I decided to simplify into larger bins). I filtered the Employment category to exclude the value "N/A (less than 16 years old)".
+
+```{r load csv, message=FALSE}
+citizenship_data <- read_csv("Citizenship-class-race-updated.csv") %>% 
+  mutate(SCHL_label = case_when(
+    SCHL_label=="1 or more years of college credit, no degree"~"1HS Graduate", # I added 1 in front of the base category. 
+    SCHL_label=="12th grade - no diploma"~"1HS Graduate",
+    SCHL_label=="Associate's degree"~"Associate's degree",
+    SCHL_label=="Bachelor's degree"~"Bachelor's degree",
+    SCHL_label=="Doctorate degree"~"Graduate School or Higher",
+    SCHL_label=="GED or alternative credential"~"1HS Graduate",
+    SCHL_label=="Grade 10"~"Some Highschool",
+    SCHL_label=="Grade 11"~"Some Highschool",
+    SCHL_label=="Grade 1"~"Grade School",
+    SCHL_label=="Grade 2"~"Grade School",
+    SCHL_label=="Grade 3"~"Grade School",
+    SCHL_label=="Grade 4"~"Grade School",
+    SCHL_label=="Grade 5"~"Grade School",
+    SCHL_label=="Grade 6"~"Grade School",
+    SCHL_label=="Grade 7"~"Grade School",
+    SCHL_label=="Grade 8"~"Grade School",
+    SCHL_label=="Grade 9"~"Some Highschool",
+    SCHL_label=="Kindergarten"~"Grade School",
+    SCHL_label=="Master's degree"~"Graduate School or Higher",
+    SCHL_label=="No schooling completed"~"No Schooling Completed",
+    SCHL_label=="Nursery school, preschool"~"No Schooling Completed",
+    SCHL_label=="Professional degree beyond a bachelor's degree"~"Graduate School or Higher",
+    SCHL_label=="Regular high school diploma"~"1HS Graduate",
+    SCHL_label=="Some college, but less than 1 year"~"1HS Graduate")) %>%
+  mutate(RACE = case_when(
+    RACE=="White"~"1White",
+    RACE=="Asian"~"Asian",
+    RACE=="American Indian and Alaska Native"~"AIAN",
+    RACE=="Black"~"Black",
+    RACE=="No data"~"No data",
+    RACE=="Other"~"Other")) %>%
+  mutate(ESR_label = case_when(
+    ESR_label=="Unemployed"~"1Unemployed",
+    ESR_label=="Armed forces, with a job but not at work"~"Armed forces, y-job, no-work",
+    ESR_label=="Civilian employed, at work"~"Civilian employed, at work",
+    ESR_label=="Civilian employed, with a job but not at work"~"Civilian employed, y-job, no-work",
+    ESR_label=="Not in labor force"~"Not in labor force",
+    ESR_label=="Not in labor force "~"Not in labor force ",
+    ESR_label=="Armed forces, at work"~"Armed forces, at work")) %>%
+  filter(ESR_label != "N/A (less than 16 years old)")
+```
+
+
+```{r run model}
+model <- lm(WAGP ~ RACE + ESR_label + SCHL_label + years_to_nat,
+            data = citizenship_data)
+summary(model)
+```
+
+## Reading the regression model
+
+The adjusted R-squared value is .30, meaning this model predicts circa 30% of variation in income in this dataset. Most of these relationships are statistically significant, meaning they are less than .05. The categories that have no statistical significance are: for race (American Indian and Alaska Native, no data), for employment status (armed forces, with a job but not at work), and education (grade school, no schooling completed). Overall, the model tells us that there is a higher statistical significance for several categories of work, than for race and education.
+
+### Race
+Race is one of the variables that has many categories that have a statistically significant relationship with income (all categories have p-values less than 0.05, with the exception of the category reported as no data that has a p-value of 0.82). The findings suggest that American Indians and Alaska Natives win 7526 less than white people(statistical significance due to a p-value of 0.01101). Furthermore, Black people win on average 4300 dollars less than white people. Asian people win on average 1260 dollars more than white people. 
+
+### Employment
+Employment status is statistically significant, with the exception of the category for armed forces that have a job but are not at work, with a p-value of 0.73.  People in the armed forces that are currently at work win, on average, 38478 dollars more than people that are unemployed. Civilians employed, at work, win on average 46671 dollars more than people that are unemployed. Civilians employed that have a job but are not at work win on average 27346 dollars more than unemployed people. Generally, the income of people that are not on the labor force is 9826 dollars less than the income of people that are unemployed. 
+
+### Education
+In general, there is a statistically significant relationship between income and several categories of education status, with the exception of two categories: grade school (p-value is 0.33112) and no schooling completed (p-value is 0.57834). People that have an associate's degree make 6869 dollars more than people that have a high school degree (p-value is 6.80e-12, meaning there is a strong statistical significance). People that have a bachelor's degree make 22710 dollars more than people that have a high school degree (p-value is 2e-16).   People that have a graduate degree or higher make on average 61471 dollars more than people with a high school degree. People that have completed some high school make 2870 dollars less than people that have a high school degree. 
+
+### Period of citizenship
+We can tell from a p-value of 0.001 that period of citizenship has a statistically significant relationship with income. For every added year of citizenship, income increases by 92 dollars. 
+
+
+
+
+
+
