@@ -1,0 +1,259 @@
+---
+title: "Assignment 5"
+author: "Ana Zhibaj"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load libraries, message=FALSE}
+library(tidyverse)
+library(ggthemes)
+library(jtools)
+library(interactions)
+library(knitr)
+```
+
+I changed some of the variables from the previous assignment, namely I reduced the number of categories for Education and Employment status. They offered a level of specificity that did not contribute to my research question. I have filtered the variable for Race, excluding the category "No data", and Employment, excluding the category "Not in labor force".  
+
+```{r load csv, message=FALSE}
+citizenship_data <- read_csv("Citizenship-class-race-updated.csv") %>% 
+  mutate(SCHL_label = case_when(
+    SCHL_label=="1 or more years of college credit, no degree"~"1HS Graduate or lower", # I added 1 in front of the base category. 
+    SCHL_label=="12th grade - no diploma"~"1HS Graduate or lower",
+    SCHL_label=="Associate's degree"~"Associate's degree",
+    SCHL_label=="Bachelor's degree"~"Bachelor's degree or Higher",
+    SCHL_label=="Doctorate degree"~"Bachelor's degree or Higher",
+    SCHL_label=="GED or alternative credential"~"1HS Graduate or lower",
+    SCHL_label=="Grade 10"~"1HS Graduate or lower",
+    SCHL_label=="Grade 11"~"1HS Graduate or lower",
+    SCHL_label=="Grade 1"~"1HS Graduate or lower",
+    SCHL_label=="Grade 2"~"1HS Graduate or lower",
+    SCHL_label=="Grade 3"~"1HS Graduate or lower",
+    SCHL_label=="Grade 4"~"1HS Graduate or lower",
+    SCHL_label=="Grade 5"~"1HS Graduate or lower",
+    SCHL_label=="Grade 6"~"1HS Graduate or lower",
+    SCHL_label=="Grade 7"~"1HS Graduate or lower",
+    SCHL_label=="Grade 8"~"1HS Graduate or lower",
+    SCHL_label=="Grade 9"~"1HS Graduate or lower",
+    SCHL_label=="Kindergarten"~"1HS Graduate or lower",
+    SCHL_label=="Master's degree"~"Bachelor's degree or Higher",
+    SCHL_label=="No schooling completed"~"No Schooling Completed",
+    SCHL_label=="Nursery school, preschool"~"No Schooling Completed",
+    SCHL_label=="Professional degree beyond a bachelor's degree"~"Bachelor's degree or Higher",
+    SCHL_label=="Regular high school diploma"~"1HS Graduate or lower",
+    SCHL_label=="Some college, but less than 1 year"~"1HS Graduate or lower")) %>%
+  mutate(RACE = case_when(
+    RACE=="White"~"1White",
+    RACE=="Asian"~"Asian",
+    RACE=="American Indian and Alaska Native"~"AIAN",
+    RACE=="Black"~"Black",
+    RACE=="No data"~"No data",
+    RACE=="Other"~"Other")) %>%
+  mutate(ESR_label = case_when(
+    ESR_label=="Unemployed"~"1Unemployed",
+    ESR_label=="Armed forces, with a job but not at work"~"Employed",
+    ESR_label=="Civilian employed, at work"~"Employed",
+    ESR_label=="Civilian employed, with a job but not at work"~"Employed",
+    ESR_label=="Not in labor force"~"Not in labor force",
+    ESR_label=="Not in labor force "~"Not in labor force ",
+    ESR_label=="Armed forces, at work"~"Employed")) %>%
+  filter(ESR_label != "N/A (less than 16 years old)") %>%
+  filter(RACE != "No data") %>%
+  filter(ESR_label != "Not in labor force")
+```
+
+
+## Model 1
+
+This is the intial regression model. The dependent variable is income, and the independent variables are race, employment, education and period of citizenship.
+
+```{r run model 1, message=FALSE}
+model1 <- lm(WAGP ~ RACE + ESR_label + SCHL_label + years_to_nat,
+            data = citizenship_data)
+summary(model1)
+```
+The adjusted R-squared value is 0.14, meaning this model predicts circa 14% of variation in income.
+
+## Model 2
+
+Adding an interaction term for race and visualizing it, to see if there are differences in income due to race. 
+
+```{r run model 2, message=FALSE}
+model2 <- lm(WAGP ~ RACE + ESR_label + SCHL_label + years_to_nat + years_to_nat:RACE + SCHL_label:RACE + ESR_label:RACE,
+             data = citizenship_data)
+summary(model2)
+```
+
+The adjusted R-squared value has increased slightly. We see that there is little to no statistical significance to adding race as an interaction term (we can devise this from the high p-values overall).
+
+## Model 3
+
+Adding an interaction term for employment and visualizing it. 
+
+```{r run model 3, message=FALSE}
+model3 <- lm(WAGP ~ RACE + ESR_label + SCHL_label + years_to_nat + years_to_nat:ESR_label + SCHL_label:ESR_label + RACE:ESR_label,
+             data = citizenship_data)
+summary(model3)
+```
+
+## Model 4
+
+Adding an interaction term for education and visualizing it. 
+
+```{r run model 4, message=FALSE}
+model4 <- lm(WAGP ~ RACE + ESR_label + SCHL_label + years_to_nat + years_to_nat:SCHL_label + ESR_label:SCHL_label + RACE:SCHL_label,
+             data = citizenship_data)
+summary(model4)
+```
+
+The adjusted R-squared value is 0.15, a 1% improve from the previous models. We can see that there's a statistically significant relationship between having a bachelor's degree or higher, and income. We can observe this from the low p-value:
+-People that have a bachelor's degree or higher and period of citizenship is related on average to an income 300 dollars more (p-value of 0.005). 
+-People that have a bachelor's degree or higher and are employed have on average an income 44000 dollars more (p-value of 2e-16).
+=People belong to other race (not specified on the list) and have a bachelor's degree or higher, make on average 32260 less (p-value of 2e-16).
+
+## Model 5
+
+I will drop the variable for education.
+
+```{r run model 5, message=FALSE}
+model5 <- lm(WAGP ~ RACE + ESR_label + years_to_nat,
+             data = citizenship_data)
+summary(model5)
+```
+I can see that the value of adjusted R-square dropped to 0.03, so I will try to add an interaction term for employment, although I'm sure the R-squared will be significantly lower. 
+
+
+## Model 6
+
+I will add an interaction term for employment. 
+
+```{r run model 6, message=FALSE}
+model6 <- lm(WAGP ~ RACE + ESR_label + years_to_nat + years_to_nat:ESR_label + RACE:ESR_label,
+             data = citizenship_data)
+summary(model6)
+```
+
+The adjusted R-sqaured in 0.04, a very low value, compared to models 1 through 4.  
+
+## Visualizing the results
+
+I will visualize the results of the adjusted R-squared values for each of the models. 
+
+```{r visualize r squared differences, message=FALSE}
+ModelFit <- tibble(model = c(1, 2, 3, 4, 5, 6),
+                   R_square = c(summary(model1)$adj.r.squared,
+                                summary(model2)$adj.r.squared,
+                                summary(model3)$adj.r.squared,
+                                summary(model4)$adj.r.squared,
+                                summary(model5)$adj.r.squared,
+                                summary(model6)$adj.r.squared))
+
+ggplot(ModelFit, aes(x = model, y = R_square)) +
+  geom_line() +
+  scale_x_continuous(name = "",
+                   breaks = breaks <- seq(1, 6, by = 1),
+                   labels = paste("Model", breaks)) +
+  scale_y_continuous(name = "Adjusted R-squared value") +
+  theme_economist()
+```
+
+We can see the dip at model 5 and 6. Model 4 is the best fit. On the next step, I will visualize the results on a table. 
+
+## Model results on a table
+
+model1 <- lm(WAGP ~ RACE + ESR_label + SCHL_label + years_to_nat,
+            data = citizenship_data)
+
+```{r knit table, message=FALSE}
+coeff_names <- c("Race American Indian \n Alaska Native \n(Compared to White)" = "RACEAIAN",
+                 "Race Asian \n(Compared to White)" = "RACEAsian",
+                 "Race Black \n(Compared to White)" = "RACEBlack",
+                 "Race Other \n(Compared to White)" = "RACEOther",
+                 "Employed \n(Compared to unemployed)" = "ESR_labelEmployed",
+                 "Education \nAssociate's degree \n(Compared to high school degree)" = "SCHL_labelAssociate's degree",
+                 "Education \nBachelor's degree or Higher \n(Compared to high school degree)" = "SCHL_labelBachelor's degree or Higher",
+                 "Education \nNo Schooling Completed \n(Compared to high school degree)" = "SCHL_labelNo Schooling Completed",
+                 "Period of naturalization" = "years_to_nat",
+                 "Interaction \nPeriod of naturalization and \nAssociate's degree" = "SCHL_labelAssociate's degree:years_to_nat",
+                 "Interaction \nPeriod of naturalization and \nBachelor's degree or Higher" = "SCHL_labelBachelor's degree or Higher:years_to_nat",
+                 "Interaction \nPeriod of naturalization and \nNo Schooling Completed" = "SCHL_labelNo Schooling Completed:years_to_nat",
+                 "Interaction \nEmployed and \nAssociate's degree" = "ESR_labelEmployed:SCHL_labelAssociate's degree",
+                 "Interaction \nEmployed and \nBachelor's degree or Higher" = "ESR_labelEmployed:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nEmployed and \nNo Schooling Completed" = "ESR_labelEmployed:SCHL_labelNo Schooling Completed",
+                 "Interaction \nAmerican Indian \n Alaska Native \nand Associate's degree" = "RACEAIAN:SCHL_labelAssociate's degree",
+                 "Interaction \nAsian \nand Associate's degree" = "RACEAsian:SCHL_labelAssociate's degree",
+                 "Interaction \nBlack \nand Associate's degree" = "RACEBlack:SCHL_labelAssociate's degree",
+                 "Interaction \nOther \nand Associate's degree" = "RACEOther:SCHL_labelAssociate's degree",
+                 "Interaction \nAmerican Indian \n Alaska Native \nand Bachelor's degree or Higher" = "RACEAIAN:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nAsian \nand Bachelor's degree or Higher" = "RACEAsian:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nBlack \nand Bachelor's degree or Higher" = "RACEBlack:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nOther \nand Bachelor's degree or Higher" = "RACEOther:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nAmerican Indian \n Alaska Native \nand No Schooling Completed" = "RACEAIAN:SCHL_labelNo Schooling Completed",
+                 "Interaction \nAsian \nand No Schooling Completed" = "RACEAsian:SCHL_labelNo Schooling Completed",
+                 "Interaction \nBlack \nand No Schooling Completed" = "RACEBlack:SCHL_labelNo Schooling Completed",
+                 "Interaction \nOther \nand No Schooling Completed" = "RACEOther:SCHL_labelNo Schooling Completed")
+export_summs(model1, model4, 
+             error_format = "(p = {p.value})",
+             error_pos = "same",
+             model.names = c("Initial model", "Preferred model"),
+             coefs = coeff_names)
+```
+
+```{r, model differences, fig.height=15, message=FALSE}
+coeff_desc <- c("Race American Indian \n Alaska Native \n(Compared to White)" = "RACEAIAN",
+                 "Race Asian \n(Compared to White)" = "RACEAsian",
+                 "Race Black \n(Compared to White)" = "RACEBlack",
+                 "Race Other \n(Compared to White)" = "RACEOther",
+                 "Employed \n(Compared to unemployed)" = "ESR_labelEmployed",
+                 "Education \nAssociate's degree \n(Compared to high school degree)" = "SCHL_labelAssociate's degree",
+                 "Education \nBachelor's degree or Higher \n(Compared to high school degree)" = "SCHL_labelBachelor's degree or Higher",
+                 "Education \nNo Schooling Completed \n(Compared to high school degree)" = "SCHL_labelNo Schooling Completed",
+                 "Interaction \nPeriod of naturalization and \nAssociate's degree" = "SCHL_labelAssociate's degree:years_to_nat",
+                 "Interaction \nPeriod of naturalization and \nBachelor's degree or Higher" = "SCHL_labelBachelor's degree or Higher:years_to_nat",
+                 "Interaction \nPeriod of naturalization and \nNo Schooling Completed" = "SCHL_labelNo Schooling Completed:years_to_nat",
+                 "Interaction \nEmployed and \nAssociate's degree" = "ESR_labelEmployed:SCHL_labelAssociate's degree",
+                 "Interaction \nEmployed and \nBachelor's degree or Higher" = "ESR_labelEmployed:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nEmployed and \nNo Schooling Completed" = "ESR_labelEmployed:SCHL_labelNo Schooling Completed",
+                 "Interaction \nAmerican Indian \n Alaska Native \nand Associate's degree" = "RACEAIAN:SCHL_labelAssociate's degree",
+                 "Interaction \nAsian \nand Associate's degree" = "RACEAsian:SCHL_labelAssociate's degree",
+                 "Interaction \nBlack \nand Associate's degree" = "RACEBlack:SCHL_labelAssociate's degree",
+                 "Interaction \nOther \nand Associate's degree" = "RACEOther:SCHL_labelAssociate's degree",
+                 "Interaction \nAmerican Indian \n Alaska Native \nand Bachelor's degree or Higher" = "RACEAIAN:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nAsian \nand Bachelor's degree or Higher" = "RACEAsian:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nBlack \nand Bachelor's degree or Higher" = "RACEBlack:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nOther \nand Bachelor's degree or Higher" = "RACEOther:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nAmerican Indian \n Alaska Native \nand No Schooling Completed" = "RACEAIAN:SCHL_labelNo Schooling Completed",
+                 "Interaction \nAsian \nand No Schooling Completed" = "RACEAsian:SCHL_labelNo Schooling Completed",
+                 "Interaction \nBlack \nand No Schooling Completed" = "RACEBlack:SCHL_labelNo Schooling Completed",
+                 "Interaction \nOther \nand No Schooling Completed" = "RACEOther:SCHL_labelNo Schooling Completed")
+
+plot_coefs(model4, 
+           coefs = coeff_desc,
+           plot.distributions = TRUE,
+           rescale.distributions = TRUE) +
+  scale_x_continuous(name = "Effect on income (dollars)")
+```
+
+## Visualizing education and income
+I will now visualize education and income, by employment, holding all the other variables at their means.
+
+```{r model education and income, message=FALSE}
+cat_plot(model3, pred = SCHL_label, modx = ESR_label, interval = TRUE) +
+ scale_x_discrete(name = "Education",
+                    labels = c("High school degree", "Associate's degree",
+                               "Bachelor's degree or Higher", "No schooling completed")) +
+  scale_color_discrete(name = "") +
+  scale_linetype_discrete(name = "") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_fill_discrete(name = "") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_y_continuous(name = "Income",
+                     breaks = seq(-25000, 100000, by = 25000))
+```
+
+Next steps: I will try to simplify the categories for education, and run the regression models.
+
+
