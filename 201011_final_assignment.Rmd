@@ -1,0 +1,687 @@
+# Citizenship, Race and Level of Education
+Final project 
+SES 5215: Analytic Methods of Urban Planning: Quantitative
+Author: Ana Zhibaj
+---
+output: html_document
+html_document:
+    theme: cosmo
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
+```{r loading libraries, echo=FALSE, message=FALSE, results='hide'}
+library(tidycensus)
+library(tidyverse)
+library(dplyr)
+library(ggthemes)
+library(jtools)
+library(interactions)
+library(knitr)
+library(viridis)
+library(ggthemes)
+library(wesanderson)
+library(skimr)
+library(cowplot)
+library(flexdashboard)
+library(shiny)
+library(lemon)
+```
+
+```{r load csv, echo=FALSE, message=FALSE, results='hide'}
+citizenship_data <- read_csv("Citizenship-class-race-updated.csv") %>% 
+  mutate(SCHL_label = case_when(
+    SCHL_label=="1 or more years of college credit, no degree"~"1HS Graduate or lower", # I added 1 in front of the base category. 
+    SCHL_label=="12th grade - no diploma"~"1HS Graduate or lower",
+    SCHL_label=="Associate's degree"~"1HS Graduate or lower",
+    SCHL_label=="Bachelor's degree"~"Bachelor's degree or Higher",
+    SCHL_label=="Doctorate degree"~"Bachelor's degree or Higher",
+    SCHL_label=="GED or alternative credential"~"1HS Graduate or lower",
+    SCHL_label=="Grade 10"~"1HS Graduate or lower",
+    SCHL_label=="Grade 11"~"1HS Graduate or lower",
+    SCHL_label=="Grade 1"~"1HS Graduate or lower",
+    SCHL_label=="Grade 2"~"1HS Graduate or lower",
+    SCHL_label=="Grade 3"~"1HS Graduate or lower",
+    SCHL_label=="Grade 4"~"1HS Graduate or lower",
+    SCHL_label=="Grade 5"~"1HS Graduate or lower",
+    SCHL_label=="Grade 6"~"1HS Graduate or lower",
+    SCHL_label=="Grade 7"~"1HS Graduate or lower",
+    SCHL_label=="Grade 8"~"1HS Graduate or lower",
+    SCHL_label=="Grade 9"~"1HS Graduate or lower",
+    SCHL_label=="Kindergarten"~"1HS Graduate or lower",
+    SCHL_label=="Master's degree"~"Bachelor's degree or Higher",
+    SCHL_label=="No schooling completed"~"No Schooling Completed",
+    SCHL_label=="Nursery school, preschool"~"No Schooling Completed",
+    SCHL_label=="Professional degree beyond a bachelor's degree"~"Bachelor's degree or Higher",
+    SCHL_label=="Regular high school diploma"~"1HS Graduate or lower",
+    SCHL_label=="Some college, but less than 1 year"~"1HS Graduate or lower")) %>%
+  mutate(RACE = case_when(
+    RACE=="White"~"1White",
+    RACE=="Asian"~"Asian",
+    RACE=="American Indian and Alaska Native"~"AIAN",
+    RACE=="Black"~"Black",
+    RACE=="No data"~"No data",
+    RACE=="Other"~"Other")) %>%
+  mutate(ESR_label = case_when(
+    ESR_label=="Unemployed"~"1Unemployed",
+    ESR_label=="Armed forces, with a job but not at work"~"Employed",
+    ESR_label=="Civilian employed, at work"~"Employed",
+    ESR_label=="Civilian employed, with a job but not at work"~"Employed",
+    ESR_label=="Not in labor force"~"Not in labor force",
+    ESR_label=="Not in labor force "~"Not in labor force ",
+    ESR_label=="Armed forces, at work"~"Employed")) %>%
+  filter(ESR_label != "N/A (less than 16 years old)") %>%
+  filter(RACE != "No data") %>%
+  filter(ESR_label != "Not in labor force")
+```
+
+
+## Introduction 
+
+I am interested in how race and the level of education affects the income of people that have gained US citizenship through the process of naturalization. The variables I have selected to investigate this interdependency are age, income, race, employment status, level of education, year of entry, and period of citizenship. I calculated the period of citizenship as the difference between the year of entry and the year when the person acquired the citizenship. 
+
+I retrieved these variables from the 2018 ACS1 dataset for the state of California. My sample population is citizens over 18 years old that have attained their citizenship by naturalization, with a total of 31246 observations.  I chose these variables because I believe that race, in tandem with period of citizenship, affect an individual's income. 
+
+
+## Data
+
+The variables I selected to answer my research question are as follows: 
+\n1. **Age** (continuous variable)
+\n2. **Income** (continuous variable)
+\n3. **Race** (categorical variable)
+\n4. **Employment status** (categorical variable)
+\n5. **Level of education** (categorical variable)
+\n6. **Year of entry** (continuous variable)
+\n7. **Period of citizenship** (continuous variable)
+
+These variables are retrieved from the 2018 ACS1 dataset for California. The following table presents the sample mean, median, standard deviation, interquartile range, and population mean for the continuous variables, with a 95% confidence interval. The distribution for each of the continuous variables is visualized on Figure 1, 2 and 3. 
+
+```{r calculate data descriptive indicators, echo=FALSE, message=FALSE, results='hide'}
+attach(citizenship_data)
+age_summary <- summary(AGEP)
+age_sd <- sd(AGEP, na.rm = TRUE)
+age_pop_mean_int <- t.test(AGEP)
+income_summary <- summary(WAGP)
+income_sd <- sd(WAGP, na.rm = TRUE)
+income_pop_mean_int <- t.test(WAGP)
+periodcit_summary <- summary(years_to_nat)
+periodcit_sd <- sd(years_to_nat, na.rm = TRUE)
+periodcit_pop_mean_int <- t.test(years_to_nat)
+```
+
+
+```{r put data descriptive indicators in table, echo=FALSE, message=FALSE, results='hide'}
+summary_table <- tibble(Statistic = c("Sample mean", 
+                "Median",
+                "Standard deviation",
+                "Interquartile range",
+                "Population mean (95% confidence)"),
+  `Median age (years)` = c(prettyNum(age_summary["Mean"], digits=3),
+                           age_summary["Median"],
+                           prettyNum(age_sd, digits = 3),
+                           paste(age_summary["1st Qu."],"to", 
+                                 age_summary["3rd Qu."]),
+                           paste(prettyNum(age_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(age_pop_mean_int$conf.int[2],
+                                               digits=3))),
+    `Income` = c(prettyNum(income_summary["Mean"], digits=3),
+                           income_summary["Median"],
+                           prettyNum(income_sd, digits = 3),
+                           paste(income_summary["1st Qu."],"to", 
+                                 income_summary["3rd Qu."]),
+                           paste(prettyNum(income_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(income_pop_mean_int$conf.int[2],
+                                               digits=3))),
+    `Period of citizenship (years)` = c(prettyNum(periodcit_summary["Mean"], digits=3),
+                           periodcit_summary["Median"],
+                           prettyNum(income_sd, digits = 3),
+                           paste(periodcit_summary["1st Qu."],"to", 
+                                 periodcit_summary["3rd Qu."]),
+                           paste(prettyNum(periodcit_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(periodcit_pop_mean_int$conf.int[2],
+                                               digits=3))))
+knitr::kable(summary_table,
+             caption = "Table 1: Summary for Continuous Variables")
+```
+
+```{r age historgram, echo=FALSE, message=FALSE, results='hide'}
+ggplot(citizenship_data, aes(x = AGEP)) +
+  geom_histogram(color = "white", binwidth = 2, fill = "#BFDBF7") +
+  theme_classic() +
+  scale_x_continuous(name = "Age (in years)") +
+  annotate("text", x = 60, y = 2500, size = 3, 
+           label = paste("Population mean (95% confidence):",
+                         prettyNum(age_pop_mean_int$conf.int[1], digits = 3),
+                         "to",
+                         prettyNum(age_pop_mean_int$conf.int[2], digits = 3),
+                         "years old.",
+                         "\nSample mean:", 
+                         prettyNum(mean(AGEP), digits = 0), "years old.",
+                         "\nSample median:",
+                         prettyNum(median(AGEP), digits = 0), "years old.",
+                         "\nSample standard deviation:",
+                         prettyNum(sd(AGEP), digits = 0), "years old.", 
+                         "\nSample interquartile range:",
+                         prettyNum(quantile(AGEP)["25%"], digits = 0),
+                         "to",
+                         prettyNum(quantile(AGEP)["75%"], digits = 0),
+                         "years old."),
+           hjust = 0, vjust = 1) +
+  labs(title = "Figure 1: Distribution of Age")
+```
+
+```{r income histogram, echo=FALSE, message=FALSE, results='hide'}
+options(scipen = 999)
+ggplot(citizenship_data, aes(x = WAGP)) +
+  geom_histogram(color = "white", binwidth = 30000, fill = "#BFDBF7") +
+  theme_classic() +
+  scale_x_continuous(name = "Income") +
+  scale_y_continuous(name = "Number of people in sample") +
+  annotate("text", x = 250000, y = 10000, size = 3, 
+           label = paste("Population mean (95% confidence):",
+                         prettyNum(income_pop_mean_int$conf.int[1], digits = 3),
+                         "to",
+                         prettyNum(income_pop_mean_int$conf.int[2], digits = 3),
+                         "$.",
+                         "\nSample mean:", 
+                         prettyNum(mean(WAGP), digits = 0), "$.",
+                         "\nSample median:",
+                         prettyNum(median(WAGP), digits = 0), "$.",
+                         "\nSample standard deviation:",
+                         prettyNum(sd(WAGP), digits = 0), "$.", 
+                         "\nSample interquartile range:",
+                         prettyNum(quantile(WAGP)["25%"], digits = 0),
+                         "to",
+                         prettyNum(quantile(WAGP)["75%"], digits = 0),
+                         "$."),
+           hjust = 0, vjust = 1) +
+  labs(title = "Figure 2: Distribution of Income")
+```
+
+```{r period of naturalization hist, echo=FALSE, message=FALSE, results='hide'}
+hist <- ggplot(citizenship_data, aes(x = years_to_nat)) + 
+  geom_histogram(
+    binwidth = 1)
+hist + 
+  theme_classic() +
+  scale_x_continuous(name = "Period of citizenship by naturalization (years)") +
+  scale_y_continuous(name = "Number of people in sample") +
+  geom_histogram(color = "white", binwidth = 1, fill = "#BFDBF7") +
+  annotate("text", x = 30, y = 2000, size = 3, 
+           label = paste("Population mean (95% confidence):",
+                         prettyNum(periodcit_pop_mean_int$conf.int[1], digits = 3),
+                         "to",
+                         prettyNum(periodcit_pop_mean_int$conf.int[2], digits = 3),
+                         "years.",
+                         "\nSample mean:", 
+                         prettyNum(mean(years_to_nat), digits = 0), "years.",
+                         "\nSample median:",
+                         prettyNum(median(years_to_nat), digits = 0), "years.",
+                         "\nSample standard deviation:",
+                         prettyNum(sd(years_to_nat), digits = 0), "years.", 
+                         "\nSample interquartile range:",
+                         prettyNum(quantile(years_to_nat)["25%"], digits = 0),
+                         "to",
+                         prettyNum(quantile(years_to_nat)["75%"], digits = 0),
+                         "years."),
+           hjust = 0, vjust = 1) +
+  labs(title = "Figure 3: Distribution of Period of Citizenship")
+```
+In the following tables, I observe the shares of the categorical variables, namely race, employment, and level of education. 
+
+```{r}
+employment <- unique(ESR_label)
+employment
+```
+
+
+```{r plot shares of employment,  echo=FALSE, message=FALSE, results='hide'}
+employed <- t.test(ESR_label == employment [1])
+unemployed <- t.test(ESR_label == employment [2])
+shares_employment <- tibble(Employment = c("Employed", 
+                            "Unemployed"),
+                 `Share` = c(employed$estimate, 
+                             unemployed$estimate),
+                 Low = c(employed$conf.int[1],
+                         unemployed$conf.int[1]),
+                 High = employed$conf.int[2],
+                         unemployed$conf.int[2])
+knitr::kable(shares_employment,
+             caption = "Table 2: Employment shares")
+```
+Employed people make up 96% of the dataset. 
+
+```{r education categories,  echo=FALSE, message=FALSE, results='hide'}
+education <- unique(SCHL_label)
+education
+```
+```{r education shares table, echo=FALSE, message=FALSE, results='hide'}
+highsch <- t.test(SCHL_label == education [1])
+bachelors <- t.test(SCHL_label == education [2])
+nosch <- t.test(SCHL_label == education [3])
+
+shares_education <- tibble(Education = c("HS Graduate or Lower", 
+                            "Bachelor's degree or Higher",
+                            "No Schooling Completed"),
+                 `Share` = c(highsch$estimate, 
+                             bachelors$estimate,
+                             nosch$estimate),
+                 Low = c(highsch$conf.int[1],
+                         bachelors$conf.int[1],
+                         nosch $conf.int[1]),
+                 High = highsch$conf.int[2],
+                         bachelors$conf.int[2],
+                         nosch $conf.int[2])
+knitr::kable(shares_education,
+             caption = "Table 3: Level of education shares")
+```
+```{r shares education plot,  echo=FALSE, message=FALSE, results='hide'}
+ggplot(shares_education, aes(x = Education, y = Share, ymin = Low, ymax = High)) +
+  geom_bar(stat = "identity", color = "white", binwidth = 1, fill = "#BFDBF7") +
+  geom_errorbar(width = 0.4) +
+  theme_classic() +
+  scale_y_continuous(name = "Share of population (error bar 95-percent confidence interval)",
+                     breaks = c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55),
+                     labels = c("0", "5%", "10%", "15%", "20%", "25%", "30%", "35%", "40%", "45%", "50%", "55%")) +
+  coord_flip() +
+  labs(title = "Figure 4: Level of education distribution by categories")
+```
+
+
+```{r race categories,  echo=FALSE, message=FALSE, results='hide'}
+race <- unique(RACE)
+race
+```
+
+```{r race shares table, echo=FALSE, message=FALSE, results='hide'}
+white <- t.test(RACE == race [1])
+asian <- t.test(RACE == race [2])
+black <- t.test(RACE == race [3])
+other <- t.test(RACE == race [4])
+aian <- t.test(RACE == race [5])
+
+shares_race <- tibble(Race = c("White", 
+                            "Asian", 
+                            "Black",
+                            "Other",
+                            "America Indian and Alaska Native"),
+                 `Share` = c(white$estimate, 
+                             asian$estimate,
+                             black$estimate,
+                             other$estimate,
+                             aian$estimate),
+                 Low = c(white$conf.int[1],
+                         asian$conf.int[1],
+                         black$conf.int[1],
+                         other$conf.int[1],
+                         aian$conf.int[1]),
+                 High = c(white$conf.int[2],
+                         asian$conf.int[2],
+                         black$conf.int[2],
+                         other$conf.int[2],
+                         aian$conf.int[2]))
+knitr::kable(shares_race,
+             caption = "Table 4: Race categories distribution")
+```
+
+```{r race shares plot, echo=FALSE, message=FALSE, results='hide'}
+ggplot(shares_race, aes(x = Race, y = Share, ymin = Low, ymax = High)) +
+  geom_bar(stat = "identity", color = "white", binwidth = 1, fill = "#BFDBF7") +
+  geom_errorbar(width = 0.4) +
+  theme_classic() +
+  scale_y_continuous(name = "Share of population (error bar 95-percent confidence interval)",
+                     breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+                     labels = c("0", "10%", "20%", "30%", "40%", "50%")) +
+  coord_flip() +
+  labs(title = "Figure 5: Race distribution by categories")
+```
+
+
+
+## Methods
+
+I will initially run correlation tests between 2 variables to test the waters. In addition, I will take into account the statistical significance of the models, and do descriptive analysis of two variables.  
+
+
+### Descriptive analysis of the continuous and categorical variables 
+
+```{r age income correlation}
+correlation_age_income <- cor.test(citizenship_data$AGEP, citizenship_data$WAGP)
+correlation_age_income
+```
+The p-value for the correlation test of age and income is 0.727, meaning that this relationship has no statistical significance. Figure 6 is a scatterplot of age and income.  
+
+```{r plot age income scatter, echo=FALSE, message=FALSE, results='hide'}
+options(scipen = 999)
+ggplot(citizenship_data, aes(x = AGEP, y = WAGP)) +
+  geom_point(size = 0.3, alpha = 0.1, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Age") +
+  scale_y_continuous(name = "Income", 
+                     breaks = seq(0, 565000, by = 50000),
+                     labels = paste("$", 
+                                    prettyNum(seq(0, 565000, by = 50000),
+                                              big.mark = ","))) +
+  annotate(geom = "text", x = 0, y = 400000, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(correlation_age_income$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(correlation_age_income$conf.int[2], digits = 2)),
+           hjust = 0) +
+  labs(title = "Figure 6: Age and Income")
+```
+
+```{r correlation test age citizenship}
+correlation_age_periodnat <- cor.test(citizenship_data$years_to_nat, citizenship_data$AGEP)
+correlation_age_periodnat
+```
+The correlation test for period of citizenship and age has a p-value equal to 2.2e-16, meaning there is a statistically significant relationship between the variables. 
+
+```{r age citizenship corre scatterplot, echo=FALSE, message=FALSE, results='hide'}
+ggplot(citizenship_data, aes(x = years_to_nat, y = AGEP)) +
+  geom_point(size = 0.3, alpha = 0.1, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Period of citizenship (in years)") +
+ scale_y_continuous(name = "Age") +
+  annotate(geom = "text", x = 0, y = 100, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(correlation_age_periodnat$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(correlation_age_periodnat$conf.int[2], digits = 2)),
+           hjust = 0) +
+  labs(title = "Figure 7: Age and period of citizenship")
+```
+
+```{r income and period of naturalization corr}
+correlation_income_period_nat <- cor.test(citizenship_data$years_to_nat, citizenship_data$WAGP)
+correlation_income_period_nat
+```
+
+The p-value for income and period of citizenship is 2.2e-16, meaning there is a statistically significant relationship between period of citizenship and income. 
+
+```{r income and period of naturalization plot, echo=FALSE, message=FALSE, results='hide'}
+options(scipen = 999)
+ggplot(citizenship_data, aes(x = years_to_nat, y = WAGP)) +
+  geom_point(size = 0.3, alpha = 0.2, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Period of citizenship (in years)") +
+ scale_y_continuous(name = "Income", 
+                     breaks = seq(0, 565000, by = 50000),
+                     labels = paste("$", 
+                                    prettyNum(seq(0, 565000, by = 50000),
+                                              big.mark = ","))) +
+  annotate(geom = "text", x = 0, y = 450000, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(correlation_income_period_nat$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(correlation_income_period_nat$conf.int[2], digits = 2)),
+           hjust = 0) +
+  labs(title = "Figure 8:Period of citizenship and income")
+```
+
+```{r race and income corr}
+anova_race_income <- aov(WAGP ~ RACE, data = citizenship_data)
+
+summary(anova_race_income)
+```
+I ran an Anova test on Race and Income. Since the p-value is 2e-16, there is a statistically significant relationship between race and income. For a more in-depth look, I will run a Tukey's Honestly Significant (THS) test. 
+
+```{r race and income Tukey}
+differences <- TukeyHSD(anova_race_income)
+
+as_tibble(cbind(pair = row.names(differences$RACE),
+                differences$RACE))
+```
+
+```{r race and income plot, echo=FALSE, message=FALSE, results='hide'}
+ggplot(citizenship_data, aes(x = RACE, y = WAGP)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Race") +
+  scale_y_continuous(name = "Income ($)", 
+                     breaks = seq(0, 565000, by = 50000),
+                     labels = paste(  prettyNum(seq(0, 565000, by = 50000),
+                                              big.mark = ","))) +
+  coord_flip() +
+  labs(title = "Figure 9: Income and race")
+```
+
+```{r race period of citizenship anova}
+anova_race_period_nat <- aov(years_to_nat ~ RACE, data = citizenship_data)
+
+summary(anova_race_period_nat)
+```
+
+There is a statistically significant relationship between race and period of citizenship, given the p-value of 2e-16. I will run the THS test. 
+
+```{r race period of citizenship THS}
+differences <- TukeyHSD(anova_race_period_nat)
+
+as_tibble(cbind(pair = row.names(differences$RACE),
+                differences$RACE))
+```
+```{r race and period of citizenship plot, echo=FALSE, message=FALSE, results='hide'}
+ggplot(citizenship_data, aes(x = RACE, y = years_to_nat)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Race") +
+  scale_y_continuous(name = "Period of citizenship", 
+                     breaks = seq(0, 100, by = 10),
+                     labels = paste(  prettyNum(seq(0, 100, by = 10),
+                                              big.mark = ","))) +
+  coord_flip() +
+  labs(title = "Figure 10: Race and period of citizenship")
+```
+
+
+```{r education income anova}
+anova_edu_income <- aov(WAGP ~ SCHL_label, data = citizenship_data)
+
+summary(anova_edu_income)
+```
+
+Since there is a statistical significance, owed to a low p-value of 2e-16, I will run a THS test. 
+
+```{r tukey edu income}
+differences <- TukeyHSD(anova_edu_income)
+
+as_tibble(cbind(pair = row.names(differences$SCHL_label),
+                differences$SCHL_label))
+```
+
+```{r edu income plot, echo=FALSE, message=FALSE, results='hide'}
+ggplot(citizenship_data, aes(x = SCHL_label, y = WAGP)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Education") +
+  scale_y_continuous(name = "Income ($)", 
+                     breaks = seq(0, 565000, by = 50000),
+                     labels = paste(  prettyNum(seq(0, 565000, by = 50000),
+                                              big.mark = ","))) +
+  coord_flip() +
+  labs(title = "Figure 11: Income and level of education")
+```
+
+```{r race and employment chi}
+chi_sq_race_work <- chisq.test(citizenship_data$RACE, citizenship_data$ESR_label) 
+chi_sq_race_work
+```
+After running the Pearson's Chi-squared test, the p-value of 0.001 indicates that there is a statistically significant relationship between race and employment status. 
+
+```{r race and employment chi plot, echo=FALSE, message=FALSE, results='hide'}
+c_diff_rw <- chi_sq_race_work$observed - chi_sq_race_work$expected
+c_diff_rw_data <- as.data.frame(c_diff_rw)
+c_diff_heatmap_rw <- ggplot(c_diff_rw_data,
+                         aes(x = citizenship_data.RACE,
+                             y = citizenship_data.ESR_label,
+                             fill = Freq)) +
+  geom_tile() +
+  scale_x_discrete(name = "Race") +
+  scale_y_discrete(name = "Employment") +
+  theme_cowplot() +
+ theme(legend.key.size =  unit(0.5, "cm"),
+        plot.title = element_text(hjust = 2),
+        axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 6),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 9)) +
+  scale_fill_gradient2(name = "Difference between \nobserved and \nexpected values",
+                       midpoint = 0,
+                       low = "purple",
+                       mid = "white",
+                       high = "orange",
+                       space = "Lab") +
+  labs(title = "Figure 12: Race and employment")
+c_diff_heatmap_rw
+```
+
+```{r race edu chi}
+chi_sq_race_edu <- chisq.test(citizenship_data$RACE, citizenship_data$SCHL_label) 
+chi_sq_race_edu
+```
+The p-value of 2.2e-16 of the Pearson's Chi-squared test indicates tat there is a statistically significant relationship between level of education and race. 
+
+```{r race edu chi plot, echo=FALSE, message=FALSE, results='hide'}
+c_diff_re <- chi_sq_race_edu$observed - chi_sq_race_edu$expected
+c_diff_re_data <- as.data.frame(c_diff_re)
+c_diffheatmap_re <- ggplot(c_diff_re_data,
+                         aes(x = citizenship_data.RACE,
+                             y = citizenship_data.SCHL_label,
+                             fill = Freq)) +
+  geom_tile() +
+  scale_x_discrete(name = "Race") +
+  scale_y_discrete(name = "Education") +
+  theme_cowplot() +
+  theme(legend.key.size =  unit(0.5, "cm"),
+        plot.title = element_text(hjust = 2),
+        axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 9)) +
+  scale_fill_gradient2(name = "Difference between \nobserved and \nexpected values",
+                       midpoint = 0,
+                       low = "purple",
+                       mid = "white",
+                       high = "orange",
+                       space = "Lab") +
+  labs(title = "Figure 13: Race and level of education")
+c_diffheatmap_re
+```
+
+### Regression models
+
+I will run regression models, choosing the following variables: 
+1. Dependent: Income. 
+2. Independent: Race, employment, level of education and period of citizenship.
+
+The preferred regression model has an interaction term for education, as opposed to the interaction term of employment for the initial model. 
+
+
+```{r run regression model, echo=FALSE, message=FALSE, results='hide'}
+model <- lm(WAGP ~ RACE + ESR_label + SCHL_label + years_to_nat + years_to_nat:SCHL_label + ESR_label:SCHL_label + RACE:SCHL_label,
+             data = citizenship_data)
+summary(model)
+```
+
+```{r run model 2, echo=FALSE, message=FALSE, results='hide'}
+model2 <- lm(WAGP ~ RACE + ESR_label + SCHL_label + years_to_nat + years_to_nat:ESR_label + SCHL_label:ESR_label + RACE:ESR_label,
+             data = citizenship_data)
+summary(model2)
+```
+
+
+
+
+```{r table the model, echo=FALSE, message=FALSE, results='hide'}
+coeff_names <- c("Race American Indian \n Alaska Native \n(Compared to White)" = "RACEAIAN",
+                 "Race Asian \n(Compared to White)" = "RACEAsian",
+                 "Race Black \n(Compared to White)" = "RACEBlack",
+                 "Race Other \n(Compared to White)" = "RACEOther",
+                 "Employed \n(Compared to unemployed)" = "ESR_labelEmployed",
+                 "Education \nBachelor's degree or Higher \n(Compared to high school degree)" = "SCHL_labelBachelor's degree or Higher",
+                 "Education \nNo Schooling Completed \n(Compared to high school degree)" = "SCHL_labelNo Schooling Completed",
+                 "Period of naturalization" = "years_to_nat",
+                 "Interaction \nPeriod of naturalization and \nBachelor's degree or Higher" = "SCHL_labelBachelor's degree or Higher:years_to_nat",
+                 "Interaction \nPeriod of naturalization and \nNo Schooling Completed" = "SCHL_labelNo Schooling Completed:years_to_nat",
+                 "Interaction \nEmployed and \nBachelor's degree or Higher" = "ESR_labelEmployed:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nEmployed and \nNo Schooling Completed" = "ESR_labelEmployed:SCHL_labelNo Schooling Completed",
+                 "Interaction \nAmerican Indian \n Alaska Native \nand Bachelor's degree or Higher" = "RACEAIAN:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nAsian \nand Bachelor's degree or Higher" = "RACEAsian:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nBlack \nand Bachelor's degree or Higher" = "RACEBlack:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nOther \nand Bachelor's degree or Higher" = "RACEOther:SCHL_labelBachelor's degree or Higher",
+                 "Interaction \nAmerican Indian \n Alaska Native \nand No Schooling Completed" = "RACEAIAN:SCHL_labelNo Schooling Completed",
+                 "Interaction \nAsian \nand No Schooling Completed" = "RACEAsian:SCHL_labelNo Schooling Completed",
+                 "Interaction \nBlack \nand No Schooling Completed" = "RACEBlack:SCHL_labelNo Schooling Completed",
+                 "Interaction \nOther \nand No Schooling Completed" = "RACEOther:SCHL_labelNo Schooling Completed")
+ export_summs(model, model2,
+             error_format = "(p = {p.value})",
+             error_pos = "same",
+             model.names = c("Preferred model", "Initial model"),
+             coefs = coeff_names)
+```
+
+```{r plot correlation model, echo=FALSE, message=FALSE, results='hide'}
+cat_plot(model, pred = SCHL_label, modx = ESR_label, interval = TRUE) +
+ scale_x_discrete(name = "Education",
+                    labels = c("High school degree", "Associate's degree",
+                               "Bachelor's degree or Higher", "No schooling completed")) +
+  scale_color_discrete(name = "") +
+  scale_linetype_discrete(name = "") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_fill_discrete(name = "") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_y_continuous(name = "Income",
+                     breaks = seq(-25000, 100000, by = 25000))
+```
+
+
+## Results 
+
+After looking at the separate correlation tests, Anova and chi-squared tests, I ran two linear regression models. The adjusted R-squared value for the preferred model is 0.15, a 1% improve from the initial model. This indicates that there is a statistically significant relationship between the level of education race, and income in the dataset of people that gained citizenship through naturalization. The preferred model indicates that: 
+1. People belong to other race (not specified on the list) make on average 5205$ less than white people (p-value of 2e-17).
+2. Employed people make 31416$ more than people that are unemployed (p-value of 2.2e-17).
+3. People that have a bachelor's degree or higher make on average 11198$ more than people that have a high school degree. 
+4. People that are employed and have a Bachelor's degree or higher make on average 42663$ more than people that are unemployed and have a high school degree (p-value 2.2e-17).
+5. Black people that have a Bachelor's degree or higher make on average 15212$ less than white people with a Bachelor's degree, statistical significance indicated by a p-value of 0.01. 
+6. People that belong to other race, not specified by the previous categories, and have a Bachelor's degree or higher, make on average 31033$ less. 
+
+
+## Discussion
+
+I ran a linear regression to ask the research question __How do race and the level of education affect the income of people that have gained US citizenship through the process of naturalization? Does race affect the income?__ 
+The dependant variable was income, and the independent variables were race, employment, level of education and period of citizenship. The adjusted R-squared value of the preferred model is 0.15, meaning this model predicts circa 15% of variations in income in this dataset. 
+
+### Race
+The findings clearly state that there is a statistical significance between race and income for people that have gained their citizenship by process of naturalization. Initially, people that belong to other race (not specified on the list) make on average 5205 dollars less than white people (p-value of 2e-17). This finding should not be taken at face value, and should be investigated further by adding more race categories to the model. In addition, people that belong to other race, not specified by the previous categories, and have a Bachelor's degree or higher, make on average 31033$ less (p-value of 2e-17).
+The most striking finding was that Black people that have a Bachelor's degree or higher make on average 15212$ less than white people with a Bachelor's degree, statistical significance indicated by a p-value of 0.01. 
+
+
+### Level of education 
+As for the level of education, it was not surprising to see that people that have a bachelor's degree or higher make on average 11198 dollars more than people that have a high school degree. In addition, people that are employed and have a Bachelor's degree or higher make on average 42663$ more than people that are unemployed and have a high school degree (p-value 2.2e-17). However, in order to dilute meaningful data about education, I encourage future researchers to do a qualitative analysis, as the level of education is (thankfully) not following a global standard, and therefore has multiple layers and nuances that contribute to work force integration. 
+
+### Limitations of the research
+Period of Citizenship ought not be taken at a face value. Building on a cross-sectional study of regulations and policies governing the process of naturalization, this would be a variable that would provide meaning to Period of Citizenship. This would imply that the year of naturalization, combined with citizenship policies, would be more contextualized and meaningful. One ought to take into account the accreditation of educational institutions from around the world, and the extent they are recognized from states; we have witnessed stories of immigrants having a successful career, academic or otherwise, in their homecountries, that could not be equivalented to US, strong-arming them towards low-income wages, more reliance on family and extended family structures as a safety net, or starting their academic journey from the start again. Finally, I would encourage future researchers to run a zero-inflated binomial model, or a Poisson model, due to the fact that income has a disproportionate number of observations equal to zero. This rendered logging income futile, and running any of these models was simply beyond the scope of this project. 
+
+
+## Conclusion
+
+This research aims to explore the relationship between race, level of education and income for people that have gained US citizenship through the process of naturalization. The dataset consists of 31246 observations from 2018 ACS1 for the state of California, for people over 18 years old that have attained citizenship through the process of naturalization. I hypothesize that race, and level of education, in tandem with period of citizenship (as a secondary variable) affect an individual's income. My analysis consists of a linear regression model that predicts 15% of variations in income, consisting of indenpendent variables for race, employment, level of education and period of citizenship and an interaction term for education. The results indicate that there is a statistical significance between race and income, more strikingly that Black people that have a Bachelor's degree or higher make on average 15212 dollars less than white people with a Bachelor's degree (p-value of 0.01). Furthermore, there is a statistically significant relationship between the level of education, and a bachelor's degree or higher make on average 11198 dollars more than people that have a high school degree.
+However, recognizing the boundaries of this is primordially a cry for contextualization: acquiring citizenship is highly governed by foreign regulations and policies, meaning that the period of citizenship in and of itself should not be taken at face value. Additionally, varying accreditation of different educational institutions from around the world plays a major role for the work force integration of people that have gained their citizenship by process of naturalization, perhaps making them more vulnerable and strong-arming them towards low-paying jobs, due to the fact that the costs of starting an undergraduate or graduate degree is insupportable. 
+
+
+
+
+
+
+
+
