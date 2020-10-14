@@ -111,7 +111,7 @@ periodcit_pop_mean_int <- t.test(years_to_nat)
 ```
 
 
-```{r put data descriptive indicators in table, echo=FALSE, message=FALSE, results='hide'}
+```{r put data descriptive indicators in table}
 summary_table <- tibble(Statistic = c("Sample mean", 
                 "Median",
                 "Standard deviation",
@@ -239,7 +239,7 @@ employment
 ```
 
 
-```{r plot shares of employment,  echo=FALSE, message=FALSE, results='hide'}
+```{r plot shares of employment}
 employed <- t.test(ESR_label == employment [1])
 unemployed <- t.test(ESR_label == employment [2])
 shares_employment <- tibble(Employment = c("Employed", 
@@ -259,7 +259,7 @@ Employed people make up 96% of the dataset.
 education <- unique(SCHL_label)
 education
 ```
-```{r education shares table, echo=FALSE, message=FALSE, results='hide'}
+```{r education shares table}
 highsch <- t.test(SCHL_label == education [1])
 bachelors <- t.test(SCHL_label == education [2])
 nosch <- t.test(SCHL_label == education [3])
@@ -297,7 +297,7 @@ race <- unique(RACE)
 race
 ```
 
-```{r race shares table, echo=FALSE, message=FALSE, results='hide'}
+```{r race shares table}
 white <- t.test(RACE == race [1])
 asian <- t.test(RACE == race [2])
 black <- t.test(RACE == race [3])
@@ -602,7 +602,7 @@ summary(model2)
 
 
 
-```{r table the model, echo=FALSE, message=FALSE, results='hide'}
+```{r table the model}
 coeff_names <- c("Race American Indian \n Alaska Native \n(Compared to White)" = "RACEAIAN",
                  "Race Asian \n(Compared to White)" = "RACEAsian",
                  "Race Black \n(Compared to White)" = "RACEBlack",
